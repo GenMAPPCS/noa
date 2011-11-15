@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JDialog;
 import org.nrnb.noa.NOA;
 import org.nrnb.noa.utils.IdMapping;
 import org.nrnb.noa.utils.NOAStaticValues;
@@ -465,6 +466,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         bAlgButtonGroup.add(sInpAlgEdgRadioButton);
         sInpAlgEdgRadioButton.setSelected(true);
         sInpAlgEdgRadioButton.setText("Edge-based");
+        sInpAlgEdgRadioButton.setActionCommand("Edge-based");
         sInpAlgEdgRadioButton.setMaximumSize(new java.awt.Dimension(140, 23));
         sInpAlgEdgRadioButton.setMinimumSize(new java.awt.Dimension(140, 23));
         sInpAlgEdgRadioButton.setPreferredSize(new java.awt.Dimension(140, 23));
@@ -611,7 +613,6 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         sParStaComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
         sParCorComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "Bonferroni", "Benjamini & Hochberg q value" }));
-        sParCorComboBox.setSelectedIndex(1);
         sParCorComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sParCorComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
@@ -1396,6 +1397,40 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
 
     private void sSubmitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sSubmitButtonActionPerformed
         // TODO add your handling code here:
+        // execute task
+        String[] selectSpecies = getSpeciesCommonName(sAnnSpeComboBox.getSelectedItem().toString());
+        List<String> localFileList = NOAUtil.retrieveLocalFiles(NOA.NOADatabaseDir);
+        String localGOslimDB = NOA.NOADatabaseDir+
+                        identifyLatestVersion(localFileList,selectSpecies[1]+
+                        "_GO"+sAnnGOtComboBox.getSelectedItem().toString().toLowerCase(), ".txt") + ".txt";
+        NOASingleEnrichmentTask task = new NOASingleEnrichmentTask(sInpAlgEdgRadioButton.isSelected(),
+                sInpTesSelRadioButton.isSelected(), sInpRefWhoRadioButton.isSelected(),
+                sParEdgComboBox.getSelectedItem(), sParStaComboBox.getSelectedItem(),
+                sParCorComboBox.getSelectedItem(), sParPvaTextField.getText(), localGOslimDB);
+        // Configure JTask Dialog Pop-Up Box
+        final JTaskConfig jTaskConfig = new JTaskConfig();
+        jTaskConfig.setOwner(Cytoscape.getDesktop());
+        jTaskConfig.displayCloseButton(true);
+        jTaskConfig.displayCancelButton(false);
+        jTaskConfig.displayStatus(true);
+        jTaskConfig.setAutoDispose(true);
+        jTaskConfig.setMillisToPopup(0); // always pop the task
+
+        // Execute Task in New Thread; pop open JTask Dialog Box.
+        TaskManager.executeTask(task, jTaskConfig);
+        boolean succ = task.success();
+        if (succ) {
+            this.setVisible(false);
+            this.dispose();
+        } else {
+            //Delete the new attributes
+//            CyAttributes nodeAttributes = Cytoscape.getNodeAttributes();
+//            for (String attrName : mapTgtAttrNameAttrType.keySet()) {
+//                nodeAttributes.deleteAttribute(attrName);
+//            }
+        }
+        final JDialog dialog = task.dialog();
+        dialog.setVisible(true);
     }//GEN-LAST:event_sSubmitButtonActionPerformed
 
     private void sCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sCancelButtonActionPerformed
