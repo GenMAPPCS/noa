@@ -41,6 +41,8 @@ import cytoscape.data.CyAttributesUtils;
 import org.nrnb.mosaic.Mosaic;
 import org.nrnb.noa.NOA;
 import csplugins.id.mapping.CyThesaurusPlugin;
+import cytoscape.CyNode;
+import java.util.HashSet;
 
 public class NOAUtil {
 
@@ -262,9 +264,9 @@ public class NOAUtil {
             String inputLine=in.readLine();
             while ((inputLine = in.readLine()) != null) {
                 String[] retail = inputLine.split("\t");
-                if(retail.length>=2) {
+                if(retail.length>=3) {
                     if(secondAttributeList.contains(retail[1].trim()))
-                        ret.put(retail[0].trim(), retail[1].trim());
+                        ret.put(retail[0].trim(), retail[1].trim()+"\t"+retail[2].trim());
                 }
             }
             in.close();
@@ -347,7 +349,7 @@ public class NOAUtil {
 	public static ArrayList<Object> setupNodeAttributeValues(String attributeName) {
 		CyAttributes attribs = Cytoscape.getNodeAttributes();
 		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
-		Collection values = attrMap.values();
+        Collection values = attrMap.values();
 		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
 
 		// key will be a List attribute value, so we need to pull out individual
@@ -373,8 +375,135 @@ public class NOAUtil {
         }
 		return uniqueValueList;
 	}
+    
+    /**
+	 * 
+	 */
+	public static void retrieveNodeCountMap(String attributeName, Map<String, String> geneGOCountMap, ArrayList<Object> potentialGOList) {
+        List<CyNode> wholeNetNodes = Cytoscape.getCurrentNetwork().nodesList();
+        CyAttributes attribs = Cytoscape.getNodeAttributes();
+		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
+		if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+             for(CyNode o : wholeNetNodes){
+                if(attrMap.containsKey(o.getIdentifier())){
+                    List oList = (List) attrMap.get(o.getIdentifier());
+                    for (int j = 0; j < oList.size(); j++) {
+                        Object jObj = oList.get(j);
+                        if(potentialGOList.indexOf(jObj)!=-1){
+                            if(geneGOCountMap.containsKey(jObj)) {
+                                geneGOCountMap.put(jObj.toString(), new Integer(geneGOCountMap.get(jObj)).intValue()+1+"");
+                            } else {
+                                geneGOCountMap.put(jObj.toString(), "1");
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            for(CyNode o : wholeNetNodes){
+                if(attrMap.containsKey(o.getIdentifier())){
+                    Object oValue = attrMap.get(o.getIdentifier());
+                    if (oValue != null) {
+                        if(potentialGOList.indexOf(oValue)!=-1){
+                            if(geneGOCountMap.containsKey(oValue)) {
+                                geneGOCountMap.put(oValue.toString(), new Integer(geneGOCountMap.get(oValue)).intValue()+1+"");
+                            } else {
+                                geneGOCountMap.put(oValue.toString(), "1");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+	}
 
+    /**
+	 *
+	 */
+	public static int retrieveAllNodeCountMap(String goFilePath, Map<String, String> goNodeCountRefMap, ArrayList<Object> potentialGOList) {
+        int ret = 0;
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(goFilePath));
+            String inputLine=in.readLine();
+            while ((inputLine = in.readLine()) != null) {
+                String[] retail = inputLine.split("\t");
+                for(int i=1;i<retail.length;i++) {
+                    String[] temp = retail[i].split(",");
+                    for(String str:temp){
+                        if(potentialGOList.contains(str)) {
+                            if(goNodeCountRefMap.containsKey(str)) {
+                                goNodeCountRefMap.put(str, new Integer(goNodeCountRefMap.get(str)).intValue()+1+"");
+                            } else {
+                                goNodeCountRefMap.put(str, "1");
+                            }
+                        }
+                    }
+                }
+                ret++;
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
 
+    /**
+	 * Generate the unique value list of the selected attribute with partial network
+	 */
+	public static ArrayList<Object> retrieveAttribute(String attributeName, Set<CyNode> selectedNetwork, Map<String, Set<String>> goGeneMap) {
+        CyAttributes attribs = Cytoscape.getNodeAttributes();
+		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
+		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
+        // key will be a List attribute value, so we need to pull out individual
+		// list items
+        if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+             for(CyNode o : selectedNetwork){
+                if(attrMap.containsKey(o.getIdentifier())){
+                    List oList = (List) attrMap.get(o.getIdentifier());
+                    for (int j = 0; j < oList.size(); j++) {
+                        Object jObj = oList.get(j);
+                        if (jObj != null) {
+                            if (!uniqueValueList.contains(jObj)) {
+                                uniqueValueList.add(jObj);
+                            }
+                            if(goGeneMap.containsKey(jObj)) {
+                                Set<String> tempSet = goGeneMap.get(jObj);
+                                tempSet.add(o.getIdentifier());
+                                goGeneMap.put(jObj.toString(), tempSet);
+                            } else {
+                                Set<String> tempSet = new HashSet<String>();
+                                tempSet.add(o.getIdentifier());
+                                goGeneMap.put(jObj.toString(), tempSet);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            for(CyNode o : selectedNetwork){
+                if(attrMap.containsKey(o.getIdentifier())){
+                    Object oValue = attrMap.get(o.getIdentifier());
+                    if (oValue != null) {
+                        if (!uniqueValueList.contains(oValue)) {
+                            uniqueValueList.add(oValue);
+                        }
+                        if(goGeneMap.containsKey(oValue)) {
+                            Set<String> tempSet = goGeneMap.get(oValue);
+                            tempSet.add(o.getIdentifier());
+                            goGeneMap.put(oValue.toString(), tempSet);
+                        } else {
+                            Set<String> tempSet = new HashSet<String>();
+                            tempSet.add(o.getIdentifier());
+                            goGeneMap.put(oValue.toString(), tempSet);
+                        }
+                    }
+                }
+            }
+        }
+        return uniqueValueList;
+	}
+    
     public static String[] parseSpeciesList(List<String> speciesList) {
         String[] result = new String[speciesList.size()];
         for(int i=0; i<result.length; i++){
