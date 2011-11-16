@@ -41,8 +41,10 @@ import cytoscape.data.CyAttributesUtils;
 import org.nrnb.mosaic.Mosaic;
 import org.nrnb.noa.NOA;
 import csplugins.id.mapping.CyThesaurusPlugin;
+import cytoscape.CyEdge;
 import cytoscape.CyNode;
 import java.util.HashSet;
+import org.nrnb.noa.algorithm.EdgeAnnotationMethod;
 
 public class NOAUtil {
 
@@ -420,6 +422,48 @@ public class NOAUtil {
     /**
 	 *
 	 */
+	public static void retrieveEdgeCountMap(String attributeName, Map<String, String> geneGOCountMap, ArrayList<Object> potentialGOList, String edgeAlg) {
+        List<CyEdge> wholeNetEdges = Cytoscape.getCurrentNetwork().edgesList();
+        CyAttributes attribs = Cytoscape.getNodeAttributes();
+		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
+        for(CyEdge edge:wholeNetEdges){
+            int nodeInt1 = Cytoscape.getRootGraph().getEdgeSourceIndex(edge.getRootGraphIndex());
+            int nodeInt2 = Cytoscape.getRootGraph().getEdgeTargetIndex(edge.getRootGraphIndex());
+            String node1 = Cytoscape.getCurrentNetwork().getNode(nodeInt1).getIdentifier();
+            String node2 = Cytoscape.getCurrentNetwork().getNode(nodeInt2).getIdentifier();
+            List edgeAnnotation;
+            if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection((List)attrMap.get(node1), (List)attrMap.get(node2));
+                else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeUnion((List)attrMap.get(node1), (List)attrMap.get(node2));
+                else
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection((List)attrMap.get(node1), (List)attrMap.get(node2));
+            } else {
+                if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection(attrMap.get(node1), attrMap.get(node2));
+                else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeUnion(attrMap.get(node1), attrMap.get(node2));
+                else
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection(attrMap.get(node1), attrMap.get(node2));
+            }
+            for (Object obj:edgeAnnotation) {
+                if (obj != null) {
+                    if(potentialGOList.indexOf(obj)!=-1){
+                        if(geneGOCountMap.containsKey(obj)) {
+                            geneGOCountMap.put(obj.toString(), new Integer(geneGOCountMap.get(obj)).intValue()+1+"");
+                        } else {
+                            geneGOCountMap.put(obj.toString(), "1");
+                        }
+                    }
+                }
+            }
+        }
+	}
+
+    /**
+	 *
+	 */
 	public static int retrieveAllNodeCountMap(String goFilePath, Map<String, String> goNodeCountRefMap, ArrayList<Object> potentialGOList) {
         int ret = 0;
         try {
@@ -451,7 +495,7 @@ public class NOAUtil {
     /**
 	 * Generate the unique value list of the selected attribute with partial network
 	 */
-	public static ArrayList<Object> retrieveAttribute(String attributeName, Set<CyNode> selectedNetwork, Map<String, Set<String>> goGeneMap) {
+	public static ArrayList<Object> retrieveNodeAttribute(String attributeName, Set<CyNode> selectedNetwork, Map<String, Set<String>> goGeneMap) {
         CyAttributes attribs = Cytoscape.getNodeAttributes();
 		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
 		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
@@ -497,6 +541,56 @@ public class NOAUtil {
                             tempSet.add(o.getIdentifier());
                             goGeneMap.put(oValue.toString(), tempSet);
                         }
+                    }
+                }
+            }
+        }
+        return uniqueValueList;
+	}
+
+    /**
+	 * Generate the unique value list of the selected attribute with partial network
+	 */
+	public static ArrayList<Object> retrieveEdgeAttribute(String attributeName, Set<CyEdge> selectedNetwork, Map<String, Set<String>> goGeneMap, String edgeAlg) {
+        CyAttributes attribs = Cytoscape.getNodeAttributes();
+		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
+		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
+        // key will be a List attribute value, so we need to pull out individual
+		// list items
+        for(CyEdge edge:selectedNetwork){
+            int nodeInt1 = Cytoscape.getRootGraph().getEdgeSourceIndex(edge.getRootGraphIndex());
+            int nodeInt2 = Cytoscape.getRootGraph().getEdgeTargetIndex(edge.getRootGraphIndex());
+            String node1 = Cytoscape.getCurrentNetwork().getNode(nodeInt1).getIdentifier();
+            String node2 = Cytoscape.getCurrentNetwork().getNode(nodeInt2).getIdentifier();
+            List edgeAnnotation;
+            if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection((List)attrMap.get(node1), (List)attrMap.get(node2));
+                else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeUnion((List)attrMap.get(node1), (List)attrMap.get(node2));
+                else
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection((List)attrMap.get(node1), (List)attrMap.get(node2));
+            } else {
+                if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection(attrMap.get(node1), attrMap.get(node2));
+                else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                    edgeAnnotation = EdgeAnnotationMethod.edgeUnion(attrMap.get(node1), attrMap.get(node2));
+                else
+                    edgeAnnotation = EdgeAnnotationMethod.edgeIntersection(attrMap.get(node1), attrMap.get(node2));
+            }
+            for (Object obj:edgeAnnotation) {
+                if (obj != null) {
+                    if (!uniqueValueList.contains(obj)) {
+                        uniqueValueList.add(obj);
+                    }
+                    if(goGeneMap.containsKey(obj)) {
+                        Set<String> tempSet = goGeneMap.get(obj);
+                        tempSet.add(edge.getIdentifier());
+                        goGeneMap.put(obj.toString(), tempSet);
+                    } else {
+                        Set<String> tempSet = new HashSet<String>();
+                        tempSet.add(edge.getIdentifier());
+                        goGeneMap.put(obj.toString(), tempSet);
                     }
                 }
             }

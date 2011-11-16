@@ -56,7 +56,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
     /** Creates new form NOASettingDialog */
     public NOASettingDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.setTitle(NOA.pluginName+" Settings"+ " "+NOA.VERSION + "1108");
+        this.setTitle(NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 1115");
         currentNetworksize = Cytoscape.getNetworkSet().size();
         loadCurrentValues();
         initComponents();
@@ -100,7 +100,8 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
             //updates ui based on current network attributes
             checkAnnotationStatus();
             Set selectedNodesSet = Cytoscape.getCurrentNetwork().getSelectedNodes();
-            if(selectedNodesSet.size()>0) {
+            Set selectedEdgesSet = Cytoscape.getCurrentNetwork().getSelectedEdges();
+            if(selectedNodesSet.size()>0 || selectedEdgesSet.size()>0) {
                 sInpTesSelRadioButton.setSelected(true);
                 sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getSelectedEdges().size()
                         +"/"+Cytoscape.getCurrentNetwork().getEdgeCount()+" edges & "
@@ -466,7 +467,6 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         bAlgButtonGroup.add(sInpAlgEdgRadioButton);
         sInpAlgEdgRadioButton.setSelected(true);
         sInpAlgEdgRadioButton.setText("Edge-based");
-        sInpAlgEdgRadioButton.setActionCommand("Edge-based");
         sInpAlgEdgRadioButton.setMaximumSize(new java.awt.Dimension(140, 23));
         sInpAlgEdgRadioButton.setMinimumSize(new java.awt.Dimension(140, 23));
         sInpAlgEdgRadioButton.setPreferredSize(new java.awt.Dimension(140, 23));
@@ -720,6 +720,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         sAnnGOtLabel.setPreferredSize(new java.awt.Dimension(130, 14));
 
         sAnnGOtComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "SlimMosaic", "SlimPIR", "SlimGeneric", "Full" }));
+        sAnnGOtComboBox.setSelectedIndex(3);
         sAnnGOtComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sAnnGOtComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
