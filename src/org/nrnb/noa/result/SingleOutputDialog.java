@@ -12,13 +12,9 @@
 package org.nrnb.noa.result;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JTable;
@@ -115,66 +111,49 @@ public class SingleOutputDialog extends javax.swing.JDialog {
         outputModel = new DefaultTableModel(cells, tableTitle);
         resultTable.setModel(outputModel);
         resultTable.getColumnModel().getColumn(0).setMinWidth(70);
-//        resultTable.getColumnModel().getColumn(0).setPreferredWidth(70);
-//        resultTable.getColumnModel().getColumn(0).setMaxWidth(70);
         resultTable.getColumnModel().getColumn(1).setMinWidth(40);
-//        resultTable.getColumnModel().getColumn(1).setPreferredWidth(40);
-//        resultTable.getColumnModel().getColumn(1).setMaxWidth(40);
         resultTable.getColumnModel().getColumn(2).setMinWidth(50);
-//        resultTable.getColumnModel().getColumn(2).setPreferredWidth(50);
-//        resultTable.getColumnModel().getColumn(2).setMaxWidth(50);
         resultTable.getColumnModel().getColumn(3).setMinWidth(100);
         resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         setColumnWidths(resultTable);
-
-
     }
-      public void setColumnWidths(JTable table) {
+    public void setColumnWidths(JTable table) {
         int headerwidth = 0;
         int datawidth = 0;
 
         int columnCount = table.getColumnCount();
         TableColumnModel tcm = table.getColumnModel();
         for (int i = 0; i < columnCount; i++) {
-          try{
-            TableColumn column = tcm.getColumn(i);
-
-            //取出表頭最大寬度
-            TableCellRenderer renderer = table.getCellRenderer(0, i);
-            Component comp = renderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, 0, i);
-            headerwidth = comp.getPreferredSize().width;
-
-              //取出欄位最大寬度
-            datawidth = calculateColumnWidth(table, i);
-
-            if(headerwidth > datawidth){
-              column.setPreferredWidth(headerwidth + 10);
+            try{
+                TableColumn column = tcm.getColumn(i);
+                TableCellRenderer renderer = table.getCellRenderer(0, i);
+                Component comp = renderer.getTableCellRendererComponent(table, column.getHeaderValue(), false, false, 0, i);
+                headerwidth = comp.getPreferredSize().width;
+                datawidth = calculateColumnWidth(table, i);
+                if(headerwidth > datawidth){
+                    column.setPreferredWidth(headerwidth + 10);
+                } else {
+                    column.setPreferredWidth(datawidth + 10);
+                }
+            }catch(Exception e){
+                e.printStackTrace();
             }
-            else{
-              column.setPreferredWidth(datawidth + 10);
-            }
-
-          }catch(Exception e){
-            e.printStackTrace();
-          }
         }
-      }
+    }
       
-      public int calculateColumnWidth(JTable table,int columnIndex) {
-
+    public int calculateColumnWidth(JTable table,int columnIndex) {
         int width = 0;
         int rowCount = table.getRowCount();
         for (int j = 0; j < rowCount; j++) {
-          TableCellRenderer renderer = table.getCellRenderer(j, columnIndex);
-          Component comp = renderer.getTableCellRendererComponent(table, table.getValueAt(j, columnIndex), false, false, j, columnIndex);
-
-          int thisWidth = comp.getPreferredSize().width;
-          if (thisWidth > width) {
-            width = thisWidth;
-          }
+            TableCellRenderer renderer = table.getCellRenderer(j, columnIndex);
+            Component comp = renderer.getTableCellRendererComponent(table, table.getValueAt(j, columnIndex), false, false, j, columnIndex);
+            int thisWidth = comp.getPreferredSize().width;
+            if (thisWidth > width) {
+                width = thisWidth;
+            }
         }
         return width;
-      }
+    }
 
 
     /** This method is called from within the constructor to
@@ -196,6 +175,9 @@ public class SingleOutputDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton1.setText("Save results");
+        jButton1.setMaximumSize(new java.awt.Dimension(95, 23));
+        jButton1.setMinimumSize(new java.awt.Dimension(95, 23));
+        jButton1.setPreferredSize(new java.awt.Dimension(95, 23));
 
         jButton2.setText("GO to Mosaic");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -205,6 +187,9 @@ public class SingleOutputDialog extends javax.swing.JDialog {
         });
 
         jButton3.setText("Cancel");
+        jButton3.setMaximumSize(new java.awt.Dimension(95, 23));
+        jButton3.setMinimumSize(new java.awt.Dimension(95, 23));
+        jButton3.setPreferredSize(new java.awt.Dimension(95, 23));
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -216,12 +201,12 @@ public class SingleOutputDialog extends javax.swing.JDialog {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(478, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addGap(36, 36, 36)
+                .addContainerGap(449, Short.MAX_VALUE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(31, 31, 31)
                 .addComponent(jButton2)
                 .addGap(31, 31, 31)
-                .addComponent(jButton3)
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -229,9 +214,9 @@ public class SingleOutputDialog extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
+                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2)
-                    .addComponent(jButton1))
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 

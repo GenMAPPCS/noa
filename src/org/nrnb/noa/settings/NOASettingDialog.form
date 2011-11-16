@@ -779,6 +779,7 @@
                         <StringItem index="3" value="Full"/>
                       </StringArray>
                     </Property>
+                    <Property name="selectedIndex" type="int" value="3"/>
                     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[90, 18]"/>
                     </Property>
