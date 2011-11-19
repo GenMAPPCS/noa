@@ -525,7 +525,7 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="2">
                         <StringItem index="0" value="Hyper-geometry"/>
-                        <StringItem index="1" value="Fisher&#x2019;s exact test"/>
+                        <StringItem index="1" value="Fisher exact test"/>
                       </StringArray>
                     </Property>
                     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">

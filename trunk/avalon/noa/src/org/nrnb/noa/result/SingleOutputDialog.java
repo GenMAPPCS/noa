@@ -1,41 +1,54 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * SingleOutputDialog.java
+/*******************************************************************************
+ * Copyright 2011 Chao Zhang
  *
- * Created on Sep 19, 2011, 10:00:30 AM
- */
-
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.nrnb.noa.result;
 
+import cytoscape.CyEdge;
+import cytoscape.Cytoscape;
 import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import org.nrnb.noa.NOA;
+import org.nrnb.noa.utils.FileChooseFilter;
 import org.nrnb.noa.utils.NOAStaticValues;
 import org.nrnb.noa.utils.NOAUtil;
 
-/**
- *
- * @author Chao
- */
-public class SingleOutputDialog extends javax.swing.JDialog {
+public class SingleOutputDialog extends JDialog implements MouseListener {
     Map<String, Set<String>> goNodeMap;
     Map<String, String> resultMap;
     String algType;
-    DefaultTableModel outputModel;
+    OutputTableModel outputModel;
     String[] tableTitle;
     Object[][] cells;
+    int selectedRow;
     
     /** Creates new form SingleOutputDialog */
     public SingleOutputDialog(java.awt.Frame parent, boolean modal, 
@@ -50,12 +63,13 @@ public class SingleOutputDialog extends javax.swing.JDialog {
     }
 
     private void initValues() {
+        this.setTitle(NOA.pluginName+"  output for Single Mode");
         if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
-            tableTitle = new String [] {"GO ID", "Type", "P-value", "Desciption", "Associated genes"};
+            tableTitle = new String [] {"GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated genes"};
         } else {
-            tableTitle = new String [] {"GO ID", "Type", "P-value", "Desciption", "Associated edges"};
+            tableTitle = new String [] {"GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated edges"};
         }
-        Object[][] goPvalueArray = new String[resultMap.size()][5];
+        Object[][] goPvalueArray = new String[resultMap.size()][7];
         int i = 0;
         int BPcount = 0;
         int CCcount = 0;
@@ -68,11 +82,21 @@ public class SingleOutputDialog extends javax.swing.JDialog {
                 String[] retail = inputLine.split("\t");
                 if(retail.length>=3) {
                     if(this.resultMap.containsKey(retail[0].trim())) {
-                        goPvalueArray[i][0] = retail[0];                        
-                        DecimalFormat df = new DecimalFormat("#.##E0");
-                        goPvalueArray[i][2] = df.format(new Double(this.resultMap.get(retail[0])).doubleValue());
-                        goPvalueArray[i][3] = retail[1];
-                        goPvalueArray[i][4] = this.goNodeMap.get(retail[0]).toString();
+                        goPvalueArray[i][0] = retail[0];
+                        String[] temp = this.resultMap.get(retail[0]).toString().split("\t");
+                        DecimalFormat df1 = new DecimalFormat("#.####");
+                        DecimalFormat df2 = new DecimalFormat("#.####E0");
+                        double pvalue = new Double(temp[0]).doubleValue();
+                        if(pvalue>0.0001)
+                            goPvalueArray[i][2] = df1.format(pvalue);
+                        else
+                            goPvalueArray[i][2] = df2.format(pvalue);
+                        //goPvalueArray[i][2] = temp[0];
+                        goPvalueArray[i][3] = temp[1];
+                        goPvalueArray[i][4] = temp[2];
+                        goPvalueArray[i][5] = retail[1];
+                        String tempList = this.goNodeMap.get(retail[0]).toString();
+                        goPvalueArray[i][6] = tempList.substring(1, tempList.length()-1).trim();
                         if(retail[2].equals("biological_process")) {
                             goPvalueArray[i][1] = "BP";
                             BPcount++;
@@ -92,7 +116,7 @@ public class SingleOutputDialog extends javax.swing.JDialog {
             e.printStackTrace();
         }
         goPvalueArray = NOAUtil.dataSort(goPvalueArray, 2);
-        cells = new Object[resultMap.size()][5];
+        cells = new Object[resultMap.size()][7];
         int BPindex = 0;
         int CCindex = BPcount;
         int MFindex = BPcount+CCcount;
@@ -108,14 +132,19 @@ public class SingleOutputDialog extends javax.swing.JDialog {
                 MFindex++;
             }
         }
-        outputModel = new DefaultTableModel(cells, tableTitle);
+        outputModel = new OutputTableModel(cells, tableTitle);
         resultTable.setModel(outputModel);
         resultTable.getColumnModel().getColumn(0).setMinWidth(70);
         resultTable.getColumnModel().getColumn(1).setMinWidth(40);
-        resultTable.getColumnModel().getColumn(2).setMinWidth(50);
-        resultTable.getColumnModel().getColumn(3).setMinWidth(100);
+        resultTable.getColumnModel().getColumn(2).setMinWidth(40);
+        resultTable.getColumnModel().getColumn(3).setMinWidth(40);
+        resultTable.getColumnModel().getColumn(4).setMinWidth(50);
+        resultTable.getColumnModel().getColumn(5).setMinWidth(100);
         resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-        setColumnWidths(resultTable);
+        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultTable.addMouseListener(this);
+        resultTable.setAutoCreateRowSorter(true);
+        setColumnWidths(resultTable);        
     }
     public void setColumnWidths(JTable table) {
         int headerwidth = 0;
@@ -166,33 +195,38 @@ public class SingleOutputDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jPanel2 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        save2FileButton = new javax.swing.JButton();
+        goMosaicButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         resultTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jButton1.setText("Save results");
-        jButton1.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButton1.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButton1.setPreferredSize(new java.awt.Dimension(95, 23));
-
-        jButton2.setText("GO to Mosaic");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        save2FileButton.setText("Save results");
+        save2FileButton.setMaximumSize(new java.awt.Dimension(95, 23));
+        save2FileButton.setMinimumSize(new java.awt.Dimension(95, 23));
+        save2FileButton.setPreferredSize(new java.awt.Dimension(95, 23));
+        save2FileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                save2FileButtonActionPerformed(evt);
             }
         });
 
-        jButton3.setText("Cancel");
-        jButton3.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButton3.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButton3.setPreferredSize(new java.awt.Dimension(95, 23));
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        goMosaicButton.setText("GO to Mosaic");
+        goMosaicButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                goMosaicButtonActionPerformed(evt);
+            }
+        });
+
+        cancelButton.setText("Cancel");
+        cancelButton.setMaximumSize(new java.awt.Dimension(95, 23));
+        cancelButton.setMinimumSize(new java.awt.Dimension(95, 23));
+        cancelButton.setPreferredSize(new java.awt.Dimension(95, 23));
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
             }
         });
 
@@ -202,11 +236,11 @@ public class SingleOutputDialog extends javax.swing.JDialog {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(449, Short.MAX_VALUE)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(31, 31, 31)
-                .addComponent(jButton2)
+                .addComponent(goMosaicButton)
                 .addGap(31, 31, 31)
-                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -214,9 +248,9 @@ public class SingleOutputDialog extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(goMosaicButton)
+                    .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
@@ -273,22 +307,106 @@ public class SingleOutputDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void goMosaicButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goMosaicButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+        
+    }//GEN-LAST:event_goMosaicButtonActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         // TODO add your handling code here:
         this.dispose();
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }//GEN-LAST:event_cancelButtonActionPerformed
+
+    private void save2FileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save2FileButtonActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new FileChooseFilter("csv","CSV (Comma delimited)(*.csv)"));
+        int returnVal = fc.showSaveDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String filePath = fc.getSelectedFile().getPath() + ".csv";
+            try {
+                int rowNumber = outputModel.getRowCount();
+                List<String> output = new ArrayList<String>();
+                for(int i=0;i<rowNumber;i++) {
+                    String tempLine = outputModel.getValueAt(i, 0)+","+outputModel.getValueAt(i, 1)
+                            +","+outputModel.getValueAt(i, 2)+",\""+outputModel.getValueAt(i, 3)
+                            +"\",\""+outputModel.getValueAt(i, 4)+"\",\""+outputModel.getValueAt(i, 5)
+                            +"\",\""+outputModel.getValueAt(i, 6)+"\"";
+                    output.add(tempLine);
+                }
+                NOAUtil.writeFile(output, filePath);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_save2FileButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton cancelButton;
+    private javax.swing.JButton goMosaicButton;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable resultTable;
+    private javax.swing.JButton save2FileButton;
     // End of variables declaration//GEN-END:variables
 
+    public void mouseClicked(MouseEvent e) {
+        if(e.getClickCount() == 1){
+			try{
+				if(e.getSource().getClass() == Class.forName("javax.swing.JTable")){
+					selectedRow = resultTable.getSelectedRow();
+                    String idList = outputModel.getValueAt(selectedRow, 6).toString();
+                    if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
+                        Cytoscape.getCurrentNetwork().unselectAllNodes();
+                        String[] nodeArray = idList.split(",");
+                        for(String node:nodeArray)
+                            Cytoscape.getCurrentNetwork().setSelectedNodeState(Cytoscape.getCyNode(node.trim()), true);
+                    } else {
+                        Cytoscape.getCurrentNetwork().unselectAllEdges();
+                        Cytoscape.getCurrentNetwork().unselectAllNodes();
+                        List<CyEdge> edgeList = Cytoscape.getCurrentNetwork().edgesList();
+                        for(CyEdge edge:edgeList) {
+                            if(idList.indexOf(edge.getIdentifier())!=-1) {
+                                Cytoscape.getCurrentNetwork().setSelectedEdgeState(edge, true);
+                                Cytoscape.getCurrentNetwork().setSelectedNodeState(edge.getSource(), true);
+                                Cytoscape.getCurrentNetwork().setSelectedNodeState(edge.getTarget(), true);
+                            }
+                        }
+                    }
+                    Cytoscape.getCurrentNetworkView().updateView();
+				}
+			} catch(Exception ex){
+				ex.printStackTrace();
+			}
+		} else if(e.getClickCount() == 2){
+			try{
+				if(e.getSource().getClass() == Class.forName("javax.swing.JTable")) {
+					if(resultTable.getSelectedColumn()==0) {
+						//just for search by seq, click the detail button to see the whole result of blast.
+						Object geneName = outputModel.getValueAt(resultTable.getSelectedRow(),0);
+						URI uri = new java.net.URI("http://amigo.geneontology.org/cgi-bin/amigo/term_details?term="+geneName);
+                        Desktop.getDesktop().browse(uri);
+					}
+				}
+			} catch(Exception ex){
+				ex.printStackTrace();
+			}
+		}
+    }
+
+    public void mousePressed(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    public void mouseEntered(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
 }

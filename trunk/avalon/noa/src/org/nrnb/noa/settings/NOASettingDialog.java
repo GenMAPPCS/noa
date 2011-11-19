@@ -39,10 +39,6 @@ import org.nrnb.noa.utils.IdMapping;
 import org.nrnb.noa.utils.NOAStaticValues;
 import org.nrnb.noa.utils.NOAUtil;
 
-/**
- *
- * @author Chao
- */
 public class NOASettingDialog extends javax.swing.JDialog implements ActionListener{
     public String annotationSpeciesCode = "";
     private String annotationButtonLabel = "Annotate";
@@ -103,13 +99,17 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
             Set selectedEdgesSet = Cytoscape.getCurrentNetwork().getSelectedEdges();
             if(selectedNodesSet.size()>0 || selectedEdgesSet.size()>0) {
                 sInpTesSelRadioButton.setSelected(true);
-                sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getSelectedEdges().size()
-                        +"/"+Cytoscape.getCurrentNetwork().getEdgeCount()+" edges & "
-                        +selectedNodesSet.size()+"/"+Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
+                if(sInpAlgEdgRadioButton.isSelected())
+                    sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getSelectedEdges().size()
+                            +"/"+Cytoscape.getCurrentNetwork().getEdgeCount()+" edges");
+                else
+                    sInpTesSelLabel.setText(selectedNodesSet.size()+"/"+
+                            Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
             } else {
                 sInpTesSelRadioButton.setEnabled(false);
-                sInpTesSelLabel.setText("0/"+Cytoscape.getCurrentNetwork().getEdgeCount()+" edges & "
-                        +"0/"+Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
+                sInpTesSelLabel.setEnabled(false);
+                sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getEdgeCount()+" edges & "
+                        +Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
             }
             checkGroupButtonSelection();
         } else {
@@ -139,12 +139,18 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
                 sInpRefGenRadioButton.setEnabled(false);
                 sInpRefWhoRadioButton.setEnabled(false);
                 sInpRefCliRadioButton.setSelected(true);
+                sInpTesSelLabel.setEnabled(false);
+                sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getEdgeCount()+" edges & "
+                        +Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
             }
             if(sInpTesSelRadioButton.isSelected()) {
                 sInpRefCliRadioButton.setEnabled(true);
                 sInpRefGenRadioButton.setEnabled(false);
                 sInpRefWhoRadioButton.setEnabled(true);
                 sInpRefWhoRadioButton.setSelected(true);
+                sInpTesSelLabel.setEnabled(true);
+                sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getSelectedEdges().size()
+                            +"/"+Cytoscape.getCurrentNetwork().getEdgeCount()+" edges");
             }
         }
         if(sInpAlgNodRadioButton.isSelected()) {
@@ -157,12 +163,18 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
                 sInpRefGenRadioButton.setEnabled(true);
                 sInpRefWhoRadioButton.setEnabled(false);
                 sInpRefGenRadioButton.setSelected(true);
+                sInpTesSelLabel.setEnabled(false);
+                sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getEdgeCount()+" edges & "
+                        +Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
             }
             if(sInpTesSelRadioButton.isSelected()) {
                 sInpRefCliRadioButton.setEnabled(false);
                 sInpRefGenRadioButton.setEnabled(true);
                 sInpRefWhoRadioButton.setEnabled(true);
                 sInpRefWhoRadioButton.setSelected(true);
+                sInpTesSelLabel.setEnabled(true);
+                sInpTesSelLabel.setText(Cytoscape.getCurrentNetwork().getSelectedNodes().size()+"/"+
+                            Cytoscape.getCurrentNetwork().getNodeCount()+" nodes");
             }
         }
     }
@@ -608,7 +620,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         sParEdgComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sParEdgComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-        sParStaComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Hyper-geometry", "Fisher’s exact test" }));
+        sParStaComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Hyper-geometry", "Fisher exact test" }));
         sParStaComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sParStaComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
@@ -1431,7 +1443,8 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
 //            }
         }
         final JDialog dialog = task.dialog();
-        dialog.setVisible(true);
+        if(dialog!=null)
+            dialog.setVisible(true);
     }//GEN-LAST:event_sSubmitButtonActionPerformed
 
     private void sCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sCancelButtonActionPerformed

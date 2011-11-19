@@ -43,6 +43,7 @@ import org.nrnb.noa.NOA;
 import csplugins.id.mapping.CyThesaurusPlugin;
 import cytoscape.CyEdge;
 import cytoscape.CyNode;
+import java.lang.reflect.Array;
 import java.util.HashSet;
 import org.nrnb.noa.algorithm.EdgeAnnotationMethod;
 
@@ -490,6 +491,51 @@ public class NOAUtil {
             e.printStackTrace();
         }
         return ret;
+    }
+
+    /**
+	 *
+	 */
+	public static void retrieveAllEdgeCountMap(String attributeName, Map<String, String> goNodeCountRefMap, ArrayList<Object> potentialGOList, String edgeAlg) {
+        Object[] wholeNetNodes = Cytoscape.getCurrentNetwork().nodesList().toArray();
+        CyAttributes attribs = Cytoscape.getNodeAttributes();
+		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
+       
+        for(int i=0;i<wholeNetNodes.length;i++){
+            CyNode node1 = (CyNode)wholeNetNodes[i];
+            for(int j=i+1;j<wholeNetNodes.length;j++){
+                CyNode node2 = (CyNode)wholeNetNodes[j];
+                if(!node1.equals(node2)){
+                    List edgeAnnotation;
+                    if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                        if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                            edgeAnnotation = EdgeAnnotationMethod.edgeIntersection((List)attrMap.get(node1.getIdentifier()), (List)attrMap.get(node2.getIdentifier()));
+                        else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                            edgeAnnotation = EdgeAnnotationMethod.edgeUnion((List)attrMap.get(node1.getIdentifier()), (List)attrMap.get(node2.getIdentifier()));
+                        else
+                            edgeAnnotation = EdgeAnnotationMethod.edgeIntersection((List)attrMap.get(node1.getIdentifier()), (List)attrMap.get(node2.getIdentifier()));
+                    } else {
+                        if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                            edgeAnnotation = EdgeAnnotationMethod.edgeIntersection(attrMap.get(node1.getIdentifier()), attrMap.get(node2.getIdentifier()));
+                        else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                            edgeAnnotation = EdgeAnnotationMethod.edgeUnion(attrMap.get(node1.getIdentifier()), attrMap.get(node2.getIdentifier()));
+                        else
+                            edgeAnnotation = EdgeAnnotationMethod.edgeIntersection(attrMap.get(node1.getIdentifier()), attrMap.get(node2.getIdentifier()));
+                    }
+                    for (Object obj:edgeAnnotation) {
+                        if (obj != null) {
+                            if(potentialGOList.indexOf(obj)!=-1){
+                                if(goNodeCountRefMap.containsKey(obj)) {
+                                    goNodeCountRefMap.put(obj.toString(), new Integer(goNodeCountRefMap.get(obj)).intValue()+1+"");
+                                } else {
+                                    goNodeCountRefMap.put(obj.toString(), "1");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
