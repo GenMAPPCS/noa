@@ -30,7 +30,7 @@ public class NOAStaticValues {
     public static final String EDGE_Intersection = "Intersection";
     public static final String EDGE_Union = "Union";
     public static final String STAT_Hypergeo = "Hyper-geometry";
-    public static final String STAT_Fisher = "Fisher’s exact test";
+    public static final String STAT_Fisher = "Fisher exact test";
     public static final String CORRECTION_Bonfer = "Bonferroni";
     public static final String CORRECTION_Benjam = "Benjamini & Hochberg q value";
 }

@@ -23,7 +23,6 @@ import cytoscape.task.TaskMonitor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -71,6 +70,7 @@ class NOASingleEnrichmentTask implements Task {
             HashMap<String, String> goNodeCountRefMap = new HashMap<String, String>();
             HashMap<String, String> resultMap = new HashMap<String, String>();
             long start=System.currentTimeMillis();
+            //if node-base algorithm has been selected.
             if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
                 Set<CyNode> selectedNodesSet = Cytoscape.getCurrentNetwork().getSelectedNodes();                
                 if(!isSubnet)
@@ -104,7 +104,7 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
                             if(pvalue<=this.pvalue)
-                                resultMap.put(eachGO.toString(), pvalue+"");
+                                resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
                         }
                     }
                     if(corrMethod.equals("none")) {
@@ -119,12 +119,12 @@ class NOASingleEnrichmentTask implements Task {
                     //Step 2: count sub or whole genome
                     taskMonitor.setStatus("Counting nodes for the whole genome......");
                     int totalNodesInGenome = NOAUtil.retrieveAllNodeCountMap(speciesGOFile, goNodeCountRefMap, potentialGOList);
-                    System.out.println(goNodeCountRefMap);
+                    //System.out.println(goNodeCountRefMap);
                     for(Object eachGO : potentialGOList) {
                         if(!eachGO.equals("unassigned")) {
                             taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
                             int valueA = goNodeMap.get(eachGO).size();
-                            int valueB = Cytoscape.getCurrentNetwork().nodesList().size();
+                            int valueB = selectedNodesSet.size();
                             int valueC = new Integer(goNodeCountRefMap.get(eachGO).toString()).intValue();
                             int valueD = totalNodesInGenome;
                             double pvalue = 0;
@@ -136,7 +136,7 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
                             if(pvalue<=this.pvalue)
-                                resultMap.put(eachGO.toString(), pvalue+"");
+                                resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
                         }
                     }
                     if(corrMethod.equals("none")) {
@@ -148,7 +148,7 @@ class NOASingleEnrichmentTask implements Task {
                     }
                 }                
                 //Step 3: loop based on potential GO list, calculate p-value for each GO
-                
+            //if edge-base algorithm has been selected.
             } else {
                 Set<CyEdge> selectedEdgesSet = Cytoscape.getCurrentNetwork().getSelectedEdges();
                 if(!isSubnet)
@@ -156,20 +156,15 @@ class NOASingleEnrichmentTask implements Task {
                 //Step 1: retrieve potential GO list base on "Test network"
                 taskMonitor.setStatus("Obtaining GO list from test network ......");
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.BP_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
-                System.out.println(potentialGOList.size());
-                //System.out.println(goNodeMap);
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.CC_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
-                System.out.println(potentialGOList.size());
-                //System.out.println(goNodeMap);
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.MF_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
-                System.out.println(potentialGOList.size());
-                //System.out.println(goNodeMap);
                 if(isWholeNet) {
                     //Step 2: count no of nodes for "whole net", save annotation mapping file into memory
                     taskMonitor.setStatus("Counting edges for the whole network ......");
                     NOAUtil.retrieveEdgeCountMap(NOAStaticValues.BP_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
                     NOAUtil.retrieveEdgeCountMap(NOAStaticValues.CC_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
                     NOAUtil.retrieveEdgeCountMap(NOAStaticValues.MF_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+                    System.out.println(goNodeCountRefMap);
                     //Step 3: loop based on potential GO list, calculate p-value for each GO
                     for(Object eachGO : potentialGOList) {
                         if(!eachGO.equals("unassigned")) {
@@ -177,7 +172,7 @@ class NOASingleEnrichmentTask implements Task {
                             int valueA = goNodeMap.get(eachGO).size();
                             int valueB = selectedEdgesSet.size();
                             int valueC = new Integer(goNodeCountRefMap.get(eachGO).toString()).intValue();
-                            int valueD = Cytoscape.getCurrentNetwork().edgesList().size();
+                            int valueD = Cytoscape.getCurrentNetwork().getEdgeCount();
                             double pvalue = 0;
                             if(statMethod.equals(NOAStaticValues.STAT_Hypergeo)) {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
@@ -187,7 +182,7 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
                             if(pvalue<=this.pvalue)
-                                resultMap.put(eachGO.toString(), pvalue+"");
+                                resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
                         }
                     }
                     if(corrMethod.equals("none")) {
@@ -201,9 +196,38 @@ class NOASingleEnrichmentTask implements Task {
                 } else {
                     //Step 2: number of edge for the whole clique
                     taskMonitor.setStatus("Counting edges for the whole clique......");
-                    int numOfEdge = Cytoscape.getCurrentNetwork().getEdgeCount();
-                    int totalEdgesInClique = numOfEdge*(numOfEdge-1)/2;
-                    System.out.println(goNodeCountRefMap);
+                    int numOfNode = Cytoscape.getCurrentNetwork().getNodeCount();
+                    int totalEdgesInClique = numOfNode*(numOfNode-1)/2;
+                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.BP_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.CC_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.MF_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+                    for(Object eachGO : potentialGOList) {
+                        if(!eachGO.equals("unassigned")) {
+                            taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
+                            int valueA = goNodeMap.get(eachGO).size();
+                            int valueB = selectedEdgesSet.size();
+                            int valueC = new Integer(goNodeCountRefMap.get(eachGO).toString()).intValue();
+                            int valueD = totalEdgesInClique;
+                            double pvalue = 0;
+                            if(statMethod.equals(NOAStaticValues.STAT_Hypergeo)) {
+                                pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
+                            } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
+                                pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                            } else {
+                                pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
+                            }
+                            if(pvalue<=this.pvalue)
+                                resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
+                        }
+                    }
+                    if(corrMethod.equals("none")) {
+
+                    } else if(corrMethod.equals(NOAStaticValues.CORRECTION_Benjam)) {
+                        resultMap = CorrectionMethod.calBenjamCorrection(resultMap, potentialGOList.size(), pvalue);
+                    } else {
+                        resultMap = CorrectionMethod.calBonferCorrection(resultMap, potentialGOList.size(), pvalue);
+                    }
+
                 }
                 //Step 1: annotate edges for the "whole network"
                 

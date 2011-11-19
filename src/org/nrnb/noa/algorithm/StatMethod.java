@@ -22,7 +22,8 @@ public class StatMethod {
     
     public static double calHyperGeoPValue(int vA, int vB, int vC, int vD) {
 		double sum = 0;
-		for(int i=vA;i<=vC;i++) {
+        int upperBound = vB>vC?vC:vB;
+		for(int i=vA;i<=upperBound;i++) {
             sum += Math.exp(getCombinationValue(i, vB, vC, vD));
 		}
 		return sum;
@@ -31,7 +32,8 @@ public class StatMethod {
     public static double calFisherTestPValue(int vA, int vB, int vC, int vD) {
 		double sum = 0;
         double exactValue = Math.exp(getCombinationValue(vA, vB, vC, vD));
-		for(int i=0;i<=vC;i++) {
+        int upperBound = vB>vC?vC:vB;
+		for(int i=0;i<=upperBound;i++) {
             double temp = Math.exp(getCombinationValue(i, vB, vC, vD));
             if(temp<=exactValue){
                 sum += temp;

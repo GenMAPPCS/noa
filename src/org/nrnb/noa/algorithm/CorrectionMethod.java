@@ -28,14 +28,12 @@ public class CorrectionMethod {
         HashMap<String, String> reducedMap = new HashMap<String, String>();
 		Set<String> goList = resultMap.keySet();
         for(String go:goList) {
-            double pvalue = new Double(resultMap.get(go)).doubleValue();
-            System.out.print(go+" "+pvalue+" ");
+            String[] temp = resultMap.get(go).toString().split("$");
+            double pvalue = new Double(temp[0]).doubleValue();
             pvalue = pvalue*total>1?1:pvalue*total;
             if(pvalue<=pvalueCutoff)
-                reducedMap.put(go, pvalue+"");
-            System.out.println(pvalue);
-        }
-        
+                reducedMap.put(go, pvalue+"$"+temp[1]+"$"+temp[2]);
+        }        
 		return reducedMap;
 	}
 
@@ -46,18 +44,18 @@ public class CorrectionMethod {
         int i=0;
         for(String go:goList) {
             goPvalueArray[i][0] = go;
-            goPvalueArray[i][1] = resultMap.get(go);
+            String[] temp = resultMap.get(go).toString().split("\t");
+            goPvalueArray[i][1] = resultMap.get(temp[0]);
             i++;
         }
         goPvalueArray = NOAUtil.dataSort(goPvalueArray, 1);
         for(i=0;i<goPvalueArray.length;i++){
+            String[] temp = resultMap.get(goPvalueArray[i][0]).toString().split("\t");
             double pvalue = new Double(goPvalueArray[i][1].toString()).doubleValue();
-            System.out.print(goPvalueArray[i][0].toString()+" "+pvalue+" ");
             pvalue = pvalue*total/(i+1);
             pvalue = pvalue>1?1:pvalue;
             if(pvalue<=pvalueCutoff)
-                reducedMap.put(goPvalueArray[i][0].toString(), pvalue+"");
-            System.out.println(pvalue);
+                reducedMap.put(goPvalueArray[i][0].toString(), pvalue+"\t"+temp[1]+"\t"+temp[2]);
         }
         return resultMap;
 	}
