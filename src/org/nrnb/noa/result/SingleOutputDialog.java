@@ -136,9 +136,9 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         resultTable.setModel(outputModel);
         resultTable.getColumnModel().getColumn(0).setMinWidth(70);
         resultTable.getColumnModel().getColumn(1).setMinWidth(40);
-        resultTable.getColumnModel().getColumn(2).setMinWidth(40);
-        resultTable.getColumnModel().getColumn(3).setMinWidth(40);
-        resultTable.getColumnModel().getColumn(4).setMinWidth(50);
+        resultTable.getColumnModel().getColumn(2).setMinWidth(60);
+        resultTable.getColumnModel().getColumn(3).setMinWidth(60);
+        resultTable.getColumnModel().getColumn(4).setMinWidth(70);
         resultTable.getColumnModel().getColumn(5).setMinWidth(100);
         resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

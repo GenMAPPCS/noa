@@ -28,11 +28,11 @@ public class CorrectionMethod {
         HashMap<String, String> reducedMap = new HashMap<String, String>();
 		Set<String> goList = resultMap.keySet();
         for(String go:goList) {
-            String[] temp = resultMap.get(go).toString().split("$");
+            String[] temp = resultMap.get(go).toString().split("\t");
             double pvalue = new Double(temp[0]).doubleValue();
             pvalue = pvalue*total>1?1:pvalue*total;
             if(pvalue<=pvalueCutoff)
-                reducedMap.put(go, pvalue+"$"+temp[1]+"$"+temp[2]);
+                reducedMap.put(go, pvalue+"\t"+temp[1]+"\t"+temp[2]);
         }        
 		return reducedMap;
 	}
