@@ -52,7 +52,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
     /** Creates new form NOASettingDialog */
     public NOASettingDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.setTitle(NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 1115");
+        this.setTitle(NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 1122");
         currentNetworksize = Cytoscape.getNetworkSet().size();
         loadCurrentValues();
         initComponents();

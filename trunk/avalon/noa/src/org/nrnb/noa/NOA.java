@@ -47,7 +47,7 @@ import org.nrnb.noa.settings.NOASettingDialog;
 // Handles the top-level menu selection event from Cytoscape
 public final class NOA extends CytoscapePlugin{
     public static String pluginName = "NOA";
-    public static double VERSION = 1.9;
+    public static double VERSION = 1.0;
     public static CyLogger logger;
     public static final String parentPluginName = "Mosaic";
     public static String NOABaseDir;
