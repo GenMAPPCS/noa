@@ -45,7 +45,7 @@ public class CorrectionMethod {
         for(String go:goList) {
             goPvalueArray[i][0] = go;
             String[] temp = resultMap.get(go).toString().split("\t");
-            goPvalueArray[i][1] = resultMap.get(temp[0]);
+            goPvalueArray[i][1] = temp[0];
             i++;
         }
         goPvalueArray = NOAUtil.dataSort(goPvalueArray, 1);
