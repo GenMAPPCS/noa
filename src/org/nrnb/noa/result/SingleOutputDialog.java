@@ -63,7 +63,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
     }
 
     private void initValues() {
-        this.setTitle(NOA.pluginName+"  output for Single Mode");
+        this.setTitle(NOA.pluginName+" output for Single Mode");
         if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
             tableTitle = new String [] {"GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated genes"};
         } else {
@@ -91,7 +91,6 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
                             goPvalueArray[i][2] = df1.format(pvalue);
                         else
                             goPvalueArray[i][2] = df2.format(pvalue);
-                        //goPvalueArray[i][2] = temp[0];
                         goPvalueArray[i][3] = temp[1];
                         goPvalueArray[i][4] = temp[2];
                         goPvalueArray[i][5] = retail[1];

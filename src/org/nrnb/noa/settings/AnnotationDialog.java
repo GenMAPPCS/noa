@@ -35,10 +35,6 @@ public class AnnotationDialog implements Task {
         selectedMappingID = mappingID;
         selectedMappingType = mappingType;
         ensemblIDType = ensemblType;
-//        if(ensemblType.toString().toLowerCase().indexOf("ensembl")!=-1) {
-//            ensemblIDType = "Ensembl";
-//        } else
-//            ensemblIDType = ensemblType;
     }
 
     public void run() {
@@ -47,18 +43,9 @@ public class AnnotationDialog implements Task {
             taskMonitor.setPercentCompleted(-1);
             long start=System.currentTimeMillis();
             System.out.println("--------------"+this.selectedMappingType+"-----------------");
-            //System.out.println(localGOslimDBPath);
             IdMapping idMapper = new IdMapping();
             idMapper.mapID(this.localDerbyDBPath, this.localGOslimDBPath,
                     this.selectedMappingID, this.selectedMappingType, this.ensemblIDType);
-//            if(this.selectedMappingType.indexOf("ensembl")==-1) {
-//                System.out.println("--------------Mapping Other ID-----------------");
-//                IdMapping.mapID(this.localDerbyDBPath, this.selectedMappingID, this.ensemblIDType);
-//                IdMapping.mapAnnotation(this.localGOslimDBPath, this.ensemblIDType);
-//            } else {
-//                System.out.println("--------------Mapping Ensembl-----------------");
-//                IdMapping.mapAnnotation(this.localGOslimDBPath, this.selectedMappingID);
-//            }
             long pause=System.currentTimeMillis();
             System.out.println("Running time:"+(pause-start)/1000/60+"min "+(pause-start)/1000%60+"sec");
             taskMonitor.setStatus("Done");
