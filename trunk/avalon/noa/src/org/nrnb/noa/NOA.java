@@ -42,8 +42,6 @@ import cytoscape.task.util.TaskManager;
 import javax.swing.JOptionPane;
 import org.nrnb.noa.settings.NOASettingDialog;
 
-
-
 // Handles the top-level menu selection event from Cytoscape
 public final class NOA extends CytoscapePlugin{
     public static String pluginName = "NOA";

@@ -43,7 +43,6 @@ import org.nrnb.noa.NOA;
 import csplugins.id.mapping.CyThesaurusPlugin;
 import cytoscape.CyEdge;
 import cytoscape.CyNode;
-import java.lang.reflect.Array;
 import java.util.HashSet;
 import org.nrnb.noa.algorithm.EdgeAnnotationMethod;
 
@@ -378,7 +377,32 @@ public class NOAUtil {
         }
 		return uniqueValueList;
 	}
-    
+
+    /**
+	 *
+	 */
+	public static void retrieveNodeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray, 
+            Set<String> nodeList, Map<String, Set<String>> geneGOCountMap, ArrayList<Object> potentialGOList) {
+        for(String node : nodeList) {
+            for(int i=0;i<3;i++){
+                Set<String> GOList = idGOMapArray[i].get(node);
+                for(String GOID : GOList) {
+                    if(potentialGOList.indexOf(GOID)!=-1){
+                        if(geneGOCountMap.containsKey(GOID)) {
+                            Set<String> tempSet = geneGOCountMap.get(GOID);
+                            tempSet.add(node);
+                            geneGOCountMap.put(GOID, tempSet);
+                        } else {
+                            Set<String> tempSet = new HashSet<String>();
+                            tempSet.add(node);
+                            geneGOCountMap.put(GOID, tempSet);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
 	 * 
 	 */
@@ -461,6 +485,42 @@ public class NOAUtil {
             }
         }
 	}
+    
+    /**
+	 *
+	 */
+	public static void retrieveEdgeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray, 
+            Set<String> allEdgeSet, Map<String, Set<String>> geneGOCountMap, ArrayList<Object> potentialGOList, String edgeAlg) {
+        for(String edge:allEdgeSet){
+            String[] nodesArray = edge.split("\t");
+            Set<String> edgeAnnotation = new HashSet();
+            if(nodesArray.length>1){
+                for(int i=0;i<3;i++){
+                    List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[0]));
+                    List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[1]));
+                    if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+                    else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2));
+                    else
+                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+                }
+            }
+            for(String GOID : edgeAnnotation) {
+                if(potentialGOList.indexOf(GOID)!=-1){
+                    if(geneGOCountMap.containsKey(GOID)) {
+                        Set<String> tempSet = geneGOCountMap.get(GOID);
+                        tempSet.add(edge.replace("\t", "-"));
+                        geneGOCountMap.put(GOID, tempSet);
+                    } else {
+                        Set<String> tempSet = new HashSet<String>();
+                        tempSet.add(edge.replace("\t", "-"));
+                        geneGOCountMap.put(GOID, tempSet);
+                    }
+                }
+            }
+        }
+	}
 
     /**
 	 *
@@ -531,6 +591,38 @@ public class NOAUtil {
                                     goNodeCountRefMap.put(obj.toString(), "1");
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+	 *
+	 */
+	public static void retrieveAllEdgeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray,
+            Set<String> allNodeSet, Map<String, String> geneGOCountMap, ArrayList<Object> potentialGOList, String edgeAlg) {
+        Object[] nodesArray = allNodeSet.toArray();
+        for(int i=0;i<nodesArray.length;i++) {
+            for(int j=i+1;j<nodesArray.length;j++){
+                Set<String> edgeAnnotation = new HashSet();
+                for(int n=0;n<3;n++){
+                    List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[i]));
+                    List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[j]));
+                    if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+                    else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2));
+                    else
+                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+                }
+                for(String GOID : edgeAnnotation) {
+                    if(potentialGOList.indexOf(GOID)!=-1){
+                        if(geneGOCountMap.containsKey(GOID)) {
+                            geneGOCountMap.put(GOID, new Integer(geneGOCountMap.get(GOID)).intValue()+1+"");
+                        } else {
+                            geneGOCountMap.put(GOID, "1");
                         }
                     }
                 }
