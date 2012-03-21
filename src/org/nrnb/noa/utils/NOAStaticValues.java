@@ -33,4 +33,8 @@ public class NOAStaticValues {
     public static final String STAT_Fisher = "Fisher exact test";
     public static final String CORRECTION_Bonfer = "Bonferroni";
     public static final String CORRECTION_Benjam = "Benjamini & Hochberg q value";
+    public static final int NETWORK_FORMAT  = 1;
+    public static final int SET_FORMAT  = 2;
+    public static final int WRONG_FORMAT  = -1;
+    public static final double LOG_PVALUE_CUTOFF = -20.0;
 }

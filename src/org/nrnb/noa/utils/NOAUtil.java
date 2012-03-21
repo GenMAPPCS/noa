@@ -43,6 +43,9 @@ import org.nrnb.noa.NOA;
 import csplugins.id.mapping.CyThesaurusPlugin;
 import cytoscape.CyEdge;
 import cytoscape.CyNode;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import org.nrnb.noa.algorithm.EdgeAnnotationMethod;
 
@@ -190,6 +193,41 @@ public class NOAUtil {
             e.printStackTrace();
         }
         return tag;
+    }
+
+    public static boolean writeDoubleArray(double[][] value, String MyFilePath) {
+		boolean tag = true;
+		try {
+			FileWriter writer = new FileWriter(MyFilePath);
+			BufferedWriter bufWriter = new BufferedWriter(writer);
+			for(int i=0;i<value.length;i++) {
+				for(int j=0;j<value[0].length;j++) {
+					bufWriter.write(value[i][j]+"\t");
+				}
+				bufWriter.newLine();
+			}
+			bufWriter.close();
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return tag;
+	}
+
+    public static void copyfile(String sourFile, String destFile) {
+        try {
+            InputStream in = new FileInputStream(sourFile);
+            OutputStream out = new FileOutputStream(destFile);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     /**
@@ -382,7 +420,7 @@ public class NOAUtil {
 	 *
 	 */
 	public static void retrieveNodeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray, 
-            Set<String> nodeList, Map<String, Set<String>> geneGOCountMap, ArrayList<Object> potentialGOList) {
+            Set<String> nodeList, Map<String, Set<String>> geneGOCountMap, List potentialGOList) {
         for(String node : nodeList) {
             for(int i=0;i<3;i++){
                 Set<String> GOList = idGOMapArray[i].get(node);
@@ -490,7 +528,7 @@ public class NOAUtil {
 	 *
 	 */
 	public static void retrieveEdgeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray, 
-            Set<String> allEdgeSet, Map<String, Set<String>> geneGOCountMap, ArrayList<Object> potentialGOList, String edgeAlg) {
+            Set<String> allEdgeSet, Map<String, Set<String>> geneGOCountMap, List potentialGOList, String edgeAlg) {
         for(String edge:allEdgeSet){
             String[] nodesArray = edge.split("\t");
             Set<String> edgeAnnotation = new HashSet();
@@ -525,7 +563,7 @@ public class NOAUtil {
     /**
 	 *
 	 */
-	public static int retrieveAllNodeCountMap(String goFilePath, Map<String, String> goNodeCountRefMap, ArrayList<Object> potentialGOList) {
+	public static int retrieveAllNodeCountMap(String goFilePath, Map<String, String> goNodeCountRefMap, List potentialGOList) {
         int ret = 0;
         try {
             BufferedReader in = new BufferedReader(new FileReader(goFilePath));
@@ -602,7 +640,7 @@ public class NOAUtil {
 	 *
 	 */
 	public static void retrieveAllEdgeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray,
-            Set<String> allNodeSet, Map<String, String> geneGOCountMap, ArrayList<Object> potentialGOList, String edgeAlg) {
+            Set<String> allNodeSet, Map<String, String> geneGOCountMap, List potentialGOList, String edgeAlg) {
         Object[] nodesArray = allNodeSet.toArray();
         for(int i=0;i<nodesArray.length;i++) {
             for(int j=i+1;j<nodesArray.length;j++){

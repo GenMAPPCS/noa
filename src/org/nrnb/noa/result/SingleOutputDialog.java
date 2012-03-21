@@ -202,7 +202,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        save2FileButton.setText("Save results");
+        save2FileButton.setText("Save to ...");
         save2FileButton.setMaximumSize(new java.awt.Dimension(95, 23));
         save2FileButton.setMinimumSize(new java.awt.Dimension(95, 23));
         save2FileButton.setPreferredSize(new java.awt.Dimension(95, 23));
@@ -212,7 +212,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
             }
         });
 
-        goMosaicButton.setText("GO to Mosaic");
+        goMosaicButton.setText("Go to Mosaic");
         goMosaicButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 goMosaicButtonActionPerformed(evt);
@@ -234,7 +234,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(449, Short.MAX_VALUE)
+                .addContainerGap(451, Short.MAX_VALUE)
                 .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(31, 31, 31)
                 .addComponent(goMosaicButton)
