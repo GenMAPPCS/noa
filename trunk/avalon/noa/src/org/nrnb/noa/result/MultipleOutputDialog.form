@@ -7,6 +7,9 @@
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
   </SyntheticProperties>
+  <Events>
+    <EventHandler event="windowClosed" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowClosed"/>
+  </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -22,33 +25,37 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jScrollPane1" alignment="1" pref="806" max="32767" attributes="0"/>
-          <Component id="jPanel2" alignment="1" max="32767" attributes="0"/>
+          <Component id="jPanel8" alignment="1" max="32767" attributes="0"/>
+          <Component id="resultTabbedPane" alignment="0" pref="806" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
-              <Component id="jScrollPane1" pref="154" max="32767" attributes="0"/>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
+          <Group type="102" alignment="1" attributes="0">
+              <Component id="resultTabbedPane" pref="154" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel8" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JPanel" name="jPanel2">
+    <Container class="javax.swing.JPanel" name="jPanel8">
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="449" max="32767" attributes="0"/>
-                  <Component id="save2FileButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="resultSwitchComboBox" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+                  <Component id="heatmapButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="219" max="32767" attributes="0"/>
+                  <Component id="save2FileButton6" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-                  <Component id="jButton2" min="-2" max="-2" attributes="0"/>
+                  <Component id="jButton8" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-                  <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="cancelButton6" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -58,9 +65,11 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="cancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jButton2" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="save2FileButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="cancelButton6" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jButton8" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="save2FileButton6" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="resultSwitchComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="heatmapButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace pref="22" max="32767" attributes="0"/>
               </Group>
@@ -68,9 +77,9 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="save2FileButton">
+        <Component class="javax.swing.JButton" name="save2FileButton6">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Save results"/>
+            <Property name="text" type="java.lang.String" value="Save to ..."/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[95, 23]"/>
             </Property>
@@ -85,15 +94,15 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="save2FileButtonActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="jButton2">
+        <Component class="javax.swing.JButton" name="jButton8">
           <Properties>
-            <Property name="text" type="java.lang.String" value="GO to Mosaic"/>
+            <Property name="text" type="java.lang.String" value="Go to Mosaic"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton2ActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="cancelButton">
+        <Component class="javax.swing.JButton" name="cancelButton6">
           <Properties>
             <Property name="text" type="java.lang.String" value="Cancel"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -110,126 +119,274 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelButtonActionPerformed"/>
           </Events>
         </Component>
-      </SubComponents>
-    </Container>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane1">
-      <AuxValues>
-        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-      </AuxValues>
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-      <SubComponents>
-        <Component class="javax.swing.JTable" name="resultTable">
+        <Component class="javax.swing.JComboBox" name="resultSwitchComboBox">
           <Properties>
-            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="6" rowCount="9">
-                <Column editable="true" title="Network ID" type="java.lang.String">
-                  <Data value="Network1"/>
-                  <Data value="Network1"/>
-                  <Data value="Network1"/>
-                  <Data value="Network2"/>
-                  <Data value="Network2"/>
-                  <Data value="Network2"/>
-                  <Data value="Network3"/>
-                  <Data value="Network3"/>
-                  <Data value="Network3"/>
-                </Column>
-                <Column editable="true" title="Top GO ID" type="java.lang.String">
-                  <Data value="GO:0022402 "/>
-                  <Data value="GO:0000785 "/>
-                  <Data value="GO:0044427"/>
-                  <Data value="GO:0006357 "/>
-                  <Data value="GO:0000790"/>
-                  <Data value="GO:0044428"/>
-                  <Data value="GO:0045944 "/>
-                  <Data value="GO:0044454 "/>
-                  <Data value="GO:0044422"/>
-                </Column>
-                <Column editable="true" title="Type" type="java.lang.String">
-                  <Data value="BP"/>
-                  <Data value="CC"/>
-                  <Data value="MF"/>
-                  <Data value="BP"/>
-                  <Data value="CC"/>
-                  <Data value="MF"/>
-                  <Data value="BP"/>
-                  <Data value="CC"/>
-                  <Data value="MF"/>
-                </Column>
-                <Column editable="true" title="P-value" type="java.lang.String">
-                  <Data value="1.2E-9"/>
-                  <Data value="8.9E-45 "/>
-                  <Data value="8.9E-45 "/>
-                  <Data value="2.7E-9"/>
-                  <Data value="4.8E-43"/>
-                  <Data value="3.6E-41"/>
-                  <Data value="4.3E-9"/>
-                  <Data value="3.4E-38"/>
-                  <Data value="2.4E-4"/>
-                </Column>
-                <Column editable="true" title="Desciption" type="java.lang.String">
-                  <Data value="cell cycle process "/>
-                  <Data value="chromatin "/>
-                  <Data value="CCAAT-binding factor complex"/>
-                  <Data value="regulation of transcription from RNA polymerase II promoter "/>
-                  <Data value="nuclear chromatin "/>
-                  <Data value="transcription factor complex "/>
-                  <Data value="positive regulation of transcription from RNA polymerase II promoter "/>
-                  <Data value="nuclear chromosome part"/>
-                  <Data value="nucleoplasm part "/>
-                </Column>
-                <Column editable="true" title="Associated genes" type="java.lang.String">
-                  <Data value="S000001592; S000006308; S000001595; S000000444; S000006010; S000006269; S000000735"/>
-                  <Data value="S000006308; S000001595; S000000444; S000006010; S000000735"/>
-                  <Data value="S000001742; S000000842; S000001545; S000006169; S000004640; S000006151"/>
-                  <Data value="S000001595; S000000444; S000006010; S000006269; S000000735"/>
-                  <Data value="S000001592; S000006308; S000001595; S000000444; S000006010"/>
-                  <Data value="S000005449; S000006098; S000005428; S000000199; S000005258; S000003134"/>
-                  <Data value="S000001592; S000006308; S000001595; S000000444; S000006010; S000006269"/>
-                  <Data value="S000006308; S000001595; S000006269; S000000735; S000004674; S000005160"/>
-                  <Data value="S000000571; S000000636"/>
-                </Column>
-              </Table>
+            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+              <StringArray count="2">
+                <StringItem index="0" value="Top results"/>
+                <StringItem index="1" value="All results"/>
+              </StringArray>
             </Property>
-            <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
-              <TableColumnModel selectionModel="0">
-                <Column maxWidth="100" minWidth="-1" prefWidth="100" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="70" minWidth="70" prefWidth="70" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="40" minWidth="40" prefWidth="40" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="50" minWidth="50" prefWidth="50" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title/>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-              </TableColumnModel>
+            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[95, 23]"/>
             </Property>
-            <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
-              <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[95, 23]"/>
+            </Property>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[95, 23]"/>
             </Property>
           </Properties>
         </Component>
+        <Component class="javax.swing.JButton" name="heatmapButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Heatmap"/>
+            <Property name="enabled" type="boolean" value="false"/>
+            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[95, 23]"/>
+            </Property>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[95, 23]"/>
+            </Property>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[95, 23]"/>
+            </Property>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="heatmapButtonActionPerformed"/>
+          </Events>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JTabbedPane" name="resultTabbedPane">
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="resultTabbedPaneMouseClicked"/>
+      </Events>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
+      <SubComponents>
+        <Container class="javax.swing.JScrollPane" name="jScrollPane1">
+          <AuxValues>
+            <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Normal results">
+                <Property name="tabTitle" type="java.lang.String" value="Normal results"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JTable" name="resultTable">
+              <Properties>
+                <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
+                  <Table columnCount="6" rowCount="9">
+                    <Column editable="true" title="Network ID" type="java.lang.String">
+                      <Data value="Network1"/>
+                      <Data value="Network1"/>
+                      <Data value="Network1"/>
+                      <Data value="Network2"/>
+                      <Data value="Network2"/>
+                      <Data value="Network2"/>
+                      <Data value="Network3"/>
+                      <Data value="Network3"/>
+                      <Data value="Network3"/>
+                    </Column>
+                    <Column editable="true" title="Top GO ID" type="java.lang.String">
+                      <Data value="GO:0022402 "/>
+                      <Data value="GO:0000785 "/>
+                      <Data value="GO:0044427"/>
+                      <Data value="GO:0006357 "/>
+                      <Data value="GO:0000790"/>
+                      <Data value="GO:0044428"/>
+                      <Data value="GO:0045944 "/>
+                      <Data value="GO:0044454 "/>
+                      <Data value="GO:0044422"/>
+                    </Column>
+                    <Column editable="true" title="Type" type="java.lang.String">
+                      <Data value="BP"/>
+                      <Data value="CC"/>
+                      <Data value="MF"/>
+                      <Data value="BP"/>
+                      <Data value="CC"/>
+                      <Data value="MF"/>
+                      <Data value="BP"/>
+                      <Data value="CC"/>
+                      <Data value="MF"/>
+                    </Column>
+                    <Column editable="true" title="P-value" type="java.lang.String">
+                      <Data value="1.2E-9"/>
+                      <Data value="8.9E-45 "/>
+                      <Data value="8.9E-45 "/>
+                      <Data value="2.7E-9"/>
+                      <Data value="4.8E-43"/>
+                      <Data value="3.6E-41"/>
+                      <Data value="4.3E-9"/>
+                      <Data value="3.4E-38"/>
+                      <Data value="2.4E-4"/>
+                    </Column>
+                    <Column editable="true" title="Desciption" type="java.lang.String">
+                      <Data value="cell cycle process "/>
+                      <Data value="chromatin "/>
+                      <Data value="CCAAT-binding factor complex"/>
+                      <Data value="regulation of transcription from RNA polymerase II promoter "/>
+                      <Data value="nuclear chromatin "/>
+                      <Data value="transcription factor complex "/>
+                      <Data value="positive regulation of transcription from RNA polymerase II promoter "/>
+                      <Data value="nuclear chromosome part"/>
+                      <Data value="nucleoplasm part "/>
+                    </Column>
+                    <Column editable="true" title="Associated genes" type="java.lang.String">
+                      <Data value="S000001592; S000006308; S000001595; S000000444; S000006010; S000006269; S000000735"/>
+                      <Data value="S000006308; S000001595; S000000444; S000006010; S000000735"/>
+                      <Data value="S000001742; S000000842; S000001545; S000006169; S000004640; S000006151"/>
+                      <Data value="S000001595; S000000444; S000006010; S000006269; S000000735"/>
+                      <Data value="S000001592; S000006308; S000001595; S000000444; S000006010"/>
+                      <Data value="S000005449; S000006098; S000005428; S000000199; S000005258; S000003134"/>
+                      <Data value="S000001592; S000006308; S000001595; S000000444; S000006010; S000006269"/>
+                      <Data value="S000006308; S000001595; S000006269; S000000735; S000004674; S000005160"/>
+                      <Data value="S000000571; S000000636"/>
+                    </Column>
+                  </Table>
+                </Property>
+                <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
+                  <TableColumnModel selectionModel="0">
+                    <Column maxWidth="100" minWidth="-1" prefWidth="100" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="70" minWidth="70" prefWidth="70" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="40" minWidth="40" prefWidth="40" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="50" minWidth="50" prefWidth="50" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                  </TableColumnModel>
+                </Property>
+                <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
+                  <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
+                </Property>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+          <AuxValues>
+            <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Overlap">
+                <Property name="tabTitle" type="java.lang.String" value="Overlap"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JTable" name="overlapTable">
+              <Properties>
+                <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
+                  <Table columnCount="4" rowCount="9">
+                    <Column editable="true" title="GO ID" type="java.lang.String">
+                      <Data value="GO:0022402 "/>
+                      <Data value="GO:0006357 "/>
+                      <Data value="GO:0045944 "/>
+                      <Data value="GO:0000785 "/>
+                      <Data value="GO:0000790"/>
+                      <Data value="GO:0044454 "/>
+                      <Data value="GO:0044427"/>
+                      <Data value="GO:0044428"/>
+                      <Data value="GO:0044422"/>
+                    </Column>
+                    <Column editable="true" title="Type" type="java.lang.String">
+                      <Data value="BP"/>
+                      <Data value="BP"/>
+                      <Data value="BP"/>
+                      <Data value="CC"/>
+                      <Data value="CC"/>
+                      <Data value="CC"/>
+                      <Data value="MF"/>
+                      <Data value="MF"/>
+                      <Data value="MF"/>
+                    </Column>
+                    <Column editable="true" title="Desciption" type="java.lang.String">
+                      <Data value="cell cycle process "/>
+                      <Data value="regulation of transcription from RNA polymerase II promoter "/>
+                      <Data value="positive regulation of transcription from RNA polymerase II promoter "/>
+                      <Data value="chromatin "/>
+                      <Data value="nuclear chromatin "/>
+                      <Data value="nuclear chromosome part"/>
+                      <Data value="CCAAT-binding factor complex"/>
+                      <Data value="transcription factor complex "/>
+                      <Data value="nucleoplasm part "/>
+                    </Column>
+                    <Column editable="true" title="Associated networks" type="java.lang.String">
+                      <Data value="S000001592; S000006308; S000001595; S000000444; S000006010; S000006269; S000000735"/>
+                      <Data value="S000001595; S000000444; S000006010; S000006269; S000000735"/>
+                      <Data value="S000001592; S000006308; S000001595; S000000444; S000006010; S000006269"/>
+                      <Data value="S000006308; S000001595; S000000444; S000006010; S000000735"/>
+                      <Data value="S000001592; S000006308; S000001595; S000000444; S000006010"/>
+                      <Data value="S000006308; S000001595; S000006269; S000000735; S000004674; S000005160"/>
+                      <Data value="S000001742; S000000842; S000001545; S000006169; S000004640; S000006151"/>
+                      <Data value="S000005449; S000006098; S000005428; S000000199; S000005258; S000003134"/>
+                      <Data value="S000000571; S000000636"/>
+                    </Column>
+                  </Table>
+                </Property>
+                <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
+                  <TableColumnModel selectionModel="0">
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                  </TableColumnModel>
+                </Property>
+                <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
+                  <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
+                </Property>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
       </SubComponents>
     </Container>
   </SubComponents>

@@ -50,6 +50,7 @@ public final class NOA extends CytoscapePlugin{
     public static final String parentPluginName = "Mosaic";
     public static String NOABaseDir;
     public static String NOADatabaseDir;
+    public static String NOATempDir;
     public static boolean tagInternetConn;
     public static boolean tagMosaicPlugin;
     public static List<String> derbyRemotelist = new ArrayList<String>();
@@ -76,6 +77,8 @@ public final class NOA extends CytoscapePlugin{
         NOAUtil.checkFolder(NOABaseDir);
         NOADatabaseDir=NOABaseDir+"/DB/";
         NOAUtil.checkFolder(NOADatabaseDir);
+        NOATempDir=NOABaseDir+"/Temp/";
+        NOAUtil.checkFolder(NOATempDir);
         speciesMappinglist = NOAUtil.readResource(this.getClass()
                 .getResource(NOAStaticValues.bridgedbSpecieslist));
         //Check internet connection
@@ -95,7 +98,7 @@ public final class NOA extends CytoscapePlugin{
                 if(supportedSpeList.size()>0) {
                     NOAStaticValues.speciesList = NOAUtil.parseSpeciesList(supportedSpeList);
                 }
-            }            
+            }
         }
 
         JMenuItem item = new JMenuItem(pluginName);
@@ -182,7 +185,7 @@ class NewDialogTask implements Task {
     public void run() {
         try {
             taskMonitor.setStatus("Initializing...");
-            dialog = new NOASettingDialog(Cytoscape.getDesktop(), true);
+            dialog = new NOASettingDialog(Cytoscape.getDesktop(), false);
             dialog.setLocationRelativeTo(Cytoscape.getDesktop());
             dialog.setResizable(true);
             taskMonitor.setPercentCompleted(100);
