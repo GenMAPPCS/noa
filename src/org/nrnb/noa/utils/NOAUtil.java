@@ -592,7 +592,7 @@ public class NOAUtil {
     }
 
     /**
-	 *
+	 *  old function, running time O(n^2)
 	 */
 	public static void retrieveAllEdgeCountMap(String attributeName, Map<String, String> goNodeCountRefMap, ArrayList<Object> potentialGOList, String edgeAlg) {
         Object[] wholeNetNodes = Cytoscape.getCurrentNetwork().nodesList().toArray();
@@ -632,6 +632,26 @@ public class NOAUtil {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /**
+	 *  new function, running time O(n)
+	 */
+	public static void retrieveAllEdgeCountMap(HashMap<String, Set<String>> goNodeMap, Map<String, String> goNodeCountRefMap, ArrayList<Object> potentialGOList, String edgeAlg, int numOfNode) {
+        for (Object obj:potentialGOList) {
+            if(goNodeMap.containsKey(obj)){
+                int numOfAnn = goNodeMap.get(obj).size();
+                int totalEdges = 0;
+                if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection)) {
+                    totalEdges = numOfAnn*(numOfAnn-1)/2;
+                } else if (edgeAlg.equals(NOAStaticValues.EDGE_Union)) {
+                    totalEdges = numOfAnn*(numOfNode-1)-numOfAnn*(numOfAnn-1)/2;
+                } else {
+                    totalEdges = numOfAnn*(numOfAnn-1)/2;
+                }
+                goNodeCountRefMap.put(obj.toString(), totalEdges+"");
             }
         }
     }

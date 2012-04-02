@@ -43,12 +43,14 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.nrnb.noa.NOA;
 import org.nrnb.noa.utils.IdMapping;
 import org.nrnb.noa.utils.NOAStaticValues;
 import org.nrnb.noa.utils.NOAUtil;
 
-public class NOASettingDialog extends javax.swing.JDialog implements ActionListener{
+public class NOASettingDialog extends javax.swing.JDialog implements ChangeListener{
     public String annotationSpeciesCode = "";
     private String annotationButtonLabel = "Annotate";
     private List<String> speciesValues = new ArrayList<String>();
@@ -66,7 +68,11 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
     /** Creates new form NOASettingDialog */
     public NOASettingDialog(java.awt.Frame parent, boolean model) {
         super(parent, model);
-        this.setTitle(NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 03/21/2012");
+        String networkTitle = Cytoscape.getCurrentNetwork().getTitle();
+        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 03/31/2012";
+        if(!networkTitle.trim().equals("0"))
+            dialogTitle += " - "+networkTitle;
+        this.setTitle(dialogTitle);
         currentNetworksize = Cytoscape.getNetworkSet().size();
         initialTag = 1;
         loadCurrentValues();
@@ -83,7 +89,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         speciesValues = Arrays.asList(NOAStaticValues.speciesList);
         if(currentNetworksize>0) {
             NOAMainTabbedPane.setSelectedIndex(0);
-            NOA.logger.debug("Initializing annotation IDs");            
+            NOA.logger.debug("Initializing annotation IDs"); 
             currentAttributeList = Arrays.asList(cytoscape.Cytoscape
                     .getNodeAttributes().getAttributeNames());
             Collections.sort(currentAttributeList);
@@ -156,7 +162,8 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
             sAnnTypComboBox.setEnabled(false);
             sSubmitButton.setEnabled(false);
         }
-
+        NOAMainTabbedPane.addChangeListener(this);
+        
         //Batch mode interface initialization
         bAnnSpeComboBox.setModel(new DefaultComboBoxModel(speciesValues.toArray()));
         String[] defaultSpecies = getSpeciesCommonName(annotationSpeciesName);
@@ -497,11 +504,6 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         NOAMainTabbedPane.setPreferredSize(new java.awt.Dimension(701, 420));
-        NOAMainTabbedPane.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                NOAMainTabbedPaneMouseClicked(evt);
-            }
-        });
 
         sInpPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -1375,7 +1377,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
     private void bAnnSpeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAnnSpeComboBoxActionPerformed
         // TODO add your handling code here:
         //System.out.println(bAnnSpeComboBox.getSelectedItem().toString());
-        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...\nThis dialog will be closed automatically.",JOptionPane.WARNING_MESSAGE);
+        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
         final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
         warningDialog.addPropertyChangeListener(
             new PropertyChangeListener() {
@@ -1491,7 +1493,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         // TODO add your handling code here:
         //Regenerate list of ID types when user select another species.
         NOA.logger.debug("change species");        
-        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...\nThis dialog will be closed automatically.",JOptionPane.WARNING_MESSAGE);
+        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
         final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
         warningDialog.addPropertyChangeListener(
             new PropertyChangeListener() {
@@ -1681,15 +1683,6 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
         checkGroupButtonSelection();    
     }//GEN-LAST:event_sInpTesSelRadioButtonActionPerformed
 
-    private void NOAMainTabbedPaneMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NOAMainTabbedPaneMouseClicked
-        // TODO add your handling code here:
-        int i = NOAMainTabbedPane.getSelectedIndex();
-        if(this.currentNetworksize<=0 && i==0)
-            JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
-                            "Please load a network first!", NOA.pluginName,
-                            JOptionPane.WARNING_MESSAGE);
-    }//GEN-LAST:event_NOAMainTabbedPaneMouseClicked
-
     private void bInpTesUplButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bInpTesUplButtonActionPerformed
         // TODO add your handling code here:
         int returnVal = fc.showOpenDialog(this);
@@ -1794,8 +1787,13 @@ public class NOASettingDialog extends javax.swing.JDialog implements ActionListe
     private javax.swing.ButtonGroup sTesButtonGroup;
     // End of variables declaration//GEN-END:variables
 
-    public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void stateChanged(ChangeEvent e) {
+        // TODO add your handling code here:
+        int i = NOAMainTabbedPane.getSelectedIndex();
+        if(this.currentNetworksize<=0 && i==0)
+            JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
+                            "Please load a network first!", NOA.pluginName,
+                            JOptionPane.WARNING_MESSAGE);
     }
 
 }
