@@ -19,8 +19,6 @@ import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -30,12 +28,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -48,12 +49,14 @@ import org.nrnb.noa.utils.NOAUtil;
  *
  * @author Chao
  */
-public class MultipleOutputDialog extends javax.swing.JDialog implements MouseListener{
+public class MultipleOutputDialog extends javax.swing.JDialog implements MouseListener,ChangeListener{
     HashMap<String, ArrayList<String>> resultMap;
+    HashMap<String, String> topResultMap;
     String algType;
     OutputTableModel outputModelForResult;
     String[] tableTitleForResult;
     Object[][] cellsForResult;
+    Object[][] cellsForTopResult;
     OutputTableModel outputModelForOverlap;
     String[] tableTitleForOverlap;
     Object[][] cellsForOverlap;
@@ -65,10 +68,12 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
     /** Creates new form SingleOutputDialog */
     public MultipleOutputDialog(java.awt.Frame parent, boolean modal,
             HashMap<String, ArrayList<String>> resultMap,
+            HashMap<String, String> topResultMap,
             String algType, int inputFormat, int recordCount,
             String tempHeatmapFileName) {
         super(parent, modal);
         this.resultMap = resultMap;
+        this.topResultMap = topResultMap;
         this.algType = algType;
         this.formatSign = inputFormat;
         this.recordCount = recordCount;
@@ -80,20 +85,22 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         this.setTitle(NOA.pluginName+" output for Batch Mode");
         if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
             if(this.formatSign == NOAStaticValues.NETWORK_FORMAT) {
-                tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated genes"};
-                tableTitleForOverlap = new String [] {"GO ID", "Type", "Desciption", "Associated networks"};
+                tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Sample", "Population", "Description", "Associated genes"};
+                tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated networks"};
             } else {
-                tableTitleForResult = new String [] {"Set ID", "GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated genes"};
-                tableTitleForOverlap = new String [] {"GO ID", "Type", "Desciption", "Associated sets"};
+                tableTitleForResult = new String [] {"Set ID", "GO ID", "Type", "P-value", "Sample", "Population", "Description", "Associated genes"};
+                tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated sets"};
             }
         } else {
-            tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated edges"};
-            tableTitleForOverlap = new String [] {"GO ID", "Type", "Desciption", "Associated networks"};
+            tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Sample", "Population", "Description", "Associated edges"};
+            tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated networks"};
         }
         Object[][] goPvalueArray = new String[recordCount][8];
+        cellsForTopResult = new Object[this.topResultMap.size()][8];
         cellsForOverlap = new Object[resultMap.size()][4];
         int i = 0;
         int j = 0;
+        int n = 0;
         int BPcount = 0;
         int CCcount = 0;
         int MFcount = 0;
@@ -153,6 +160,32 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 //                        }
                         j++;
                     }
+                    if(this.topResultMap.containsKey(retail[0].trim())) {
+                        String eachNet = this.topResultMap.get(retail[0].trim());                        
+                        cellsForTopResult[n][1] = retail[0];
+                        String[] temp = eachNet.trim().split("\t");
+                        cellsForTopResult[n][0] = temp[3].trim();
+                        DecimalFormat df1 = new DecimalFormat("#.####");
+                        DecimalFormat df2 = new DecimalFormat("#.####E0");
+                        double pvalue = new Double(temp[0]).doubleValue();
+                        if(pvalue>0.0001)
+                            cellsForTopResult[n][3] = df1.format(pvalue);
+                        else
+                            cellsForTopResult[n][3] = df2.format(pvalue);
+                        cellsForTopResult[n][4] = temp[1];
+                        cellsForTopResult[n][5] = temp[2];
+                        cellsForTopResult[n][6] = retail[1];
+
+                        cellsForTopResult[n][7] = temp[4].substring(1, temp[4].length()-1).trim();
+                        if(retail[2].equals("biological_process")) {
+                            cellsForTopResult[n][2] = "BP";
+                        } else if (retail[2].equals("cellular_component")) {
+                            cellsForTopResult[n][2] = "CC";
+                        } else {
+                            cellsForTopResult[n][2] = "MF";
+                        }
+                        n++;
+                    }
                 }
             }
             in.close();
@@ -197,6 +230,10 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         overlapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         overlapTable.addMouseListener(this);
         overlapTable.setAutoCreateRowSorter(true);
+
+        resultTabbedPane.addChangeListener(this);
+        heatmapButton.setVisible(false);
+        goMosaicButton.setVisible(false);
     }
     
     public void setColumnWidths(JTable table) {
@@ -247,9 +284,9 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
     private void initComponents() {
 
         jPanel8 = new javax.swing.JPanel();
-        save2FileButton6 = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
-        cancelButton6 = new javax.swing.JButton();
+        save2FileButton = new javax.swing.JButton();
+        goMosaicButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
         resultSwitchComboBox = new javax.swing.JComboBox();
         heatmapButton = new javax.swing.JButton();
         resultTabbedPane = new javax.swing.JTabbedPane();
@@ -265,37 +302,43 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
             }
         });
 
-        save2FileButton6.setText("Save to ...");
-        save2FileButton6.setMaximumSize(new java.awt.Dimension(95, 23));
-        save2FileButton6.setMinimumSize(new java.awt.Dimension(95, 23));
-        save2FileButton6.setPreferredSize(new java.awt.Dimension(95, 23));
-        save2FileButton6.addActionListener(new java.awt.event.ActionListener() {
+        save2FileButton.setText("Save to ...");
+        save2FileButton.setMaximumSize(new java.awt.Dimension(95, 23));
+        save2FileButton.setMinimumSize(new java.awt.Dimension(95, 23));
+        save2FileButton.setPreferredSize(new java.awt.Dimension(95, 23));
+        save2FileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 save2FileButtonActionPerformed(evt);
             }
         });
 
-        jButton8.setText("Go to Mosaic");
-        jButton8.addActionListener(new java.awt.event.ActionListener() {
+        goMosaicButton.setText("Go to Mosaic");
+        goMosaicButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
             }
         });
 
-        cancelButton6.setText("Cancel");
-        cancelButton6.setMaximumSize(new java.awt.Dimension(95, 23));
-        cancelButton6.setMinimumSize(new java.awt.Dimension(95, 23));
-        cancelButton6.setPreferredSize(new java.awt.Dimension(95, 23));
-        cancelButton6.addActionListener(new java.awt.event.ActionListener() {
+        cancelButton.setText("Cancel");
+        cancelButton.setMaximumSize(new java.awt.Dimension(95, 23));
+        cancelButton.setMinimumSize(new java.awt.Dimension(95, 23));
+        cancelButton.setPreferredSize(new java.awt.Dimension(95, 23));
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
             }
         });
 
         resultSwitchComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Top results", "All results" }));
+        resultSwitchComboBox.setSelectedIndex(1);
         resultSwitchComboBox.setMaximumSize(new java.awt.Dimension(95, 23));
         resultSwitchComboBox.setMinimumSize(new java.awt.Dimension(95, 23));
         resultSwitchComboBox.setPreferredSize(new java.awt.Dimension(95, 23));
+        resultSwitchComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resultSwitchComboBoxActionPerformed(evt);
+            }
+        });
 
         heatmapButton.setText("Heatmap");
         heatmapButton.setEnabled(false);
@@ -314,15 +357,15 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(resultSwitchComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32)
                 .addComponent(heatmapButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 219, Short.MAX_VALUE)
-                .addComponent(save2FileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(resultSwitchComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 245, Short.MAX_VALUE)
+                .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(31, 31, 31)
-                .addComponent(jButton8)
+                .addComponent(goMosaicButton)
                 .addGap(31, 31, 31)
-                .addComponent(cancelButton6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -330,19 +373,13 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cancelButton6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton8)
-                    .addComponent(save2FileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(goMosaicButton)
+                    .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(resultSwitchComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(heatmapButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
-
-        resultTabbedPane.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                resultTabbedPaneMouseClicked(evt);
-            }
-        });
 
         resultTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -357,7 +394,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
                 {"Network3", "GO:0044422", "MF", "2.4E-4", "nucleoplasm part ", "S000000571; S000000636"}
             },
             new String [] {
-                "Network ID", "Top GO ID", "Type", "P-value", "Desciption", "Associated genes"
+                "Network ID", "Top GO ID", "Type", "P-value", "Description", "Associated genes"
             }
         ) {
             Class[] types = new Class [] {
@@ -396,7 +433,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
                 {"GO:0044422", "MF", "nucleoplasm part ", "S000000571; S000000636"}
             },
             new String [] {
-                "GO ID", "Type", "Desciption", "Associated networks"
+                "GO ID", "Type", "Description", "Associated networks"
             }
         ) {
             Class[] types = new Class [] {
@@ -475,19 +512,6 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         }
 }//GEN-LAST:event_save2FileButtonActionPerformed
 
-    private void resultTabbedPaneMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultTabbedPaneMouseClicked
-        // TODO add your handling code here:
-        int i = resultTabbedPane.getSelectedIndex();
-        if(i==0) {
-            heatmapButton.setEnabled(false);
-            resultSwitchComboBox.setEnabled(true);
-        } else if (i==1) {
-            if(new File(NOA.NOATempDir+heatmapFileName).exists())
-                heatmapButton.setEnabled(true);
-            resultSwitchComboBox.setEnabled(false);
-        }
-    }//GEN-LAST:event_resultTabbedPaneMouseClicked
-
     private void heatmapButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_heatmapButtonActionPerformed
         // TODO add your handling code here:
         if(new File(NOA.NOATempDir+heatmapFileName).exists()){
@@ -550,10 +574,32 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         this.dispose();
     }//GEN-LAST:event_formWindowClosed
 
+    private void resultSwitchComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resultSwitchComboBoxActionPerformed
+        // TODO add your handling code here:
+        if(((JComboBox)evt.getSource()).getSelectedItem().equals("Top results")) {
+            outputModelForResult = new OutputTableModel(cellsForTopResult, tableTitleForResult);
+        } else {
+            outputModelForResult = new OutputTableModel(cellsForResult, tableTitleForResult);
+        }
+        resultTable.setModel(outputModelForResult);
+        resultTable.getColumnModel().getColumn(0).setMinWidth(70);
+        resultTable.getColumnModel().getColumn(1).setMinWidth(70);
+        resultTable.getColumnModel().getColumn(2).setMinWidth(40);
+        resultTable.getColumnModel().getColumn(3).setMinWidth(60);
+        resultTable.getColumnModel().getColumn(4).setMinWidth(60);
+        resultTable.getColumnModel().getColumn(5).setMinWidth(70);
+        resultTable.getColumnModel().getColumn(6).setMinWidth(100);
+        resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultTable.addMouseListener(this);
+        resultTable.setAutoCreateRowSorter(true);
+        setColumnWidths(resultTable);
+    }//GEN-LAST:event_resultSwitchComboBoxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cancelButton6;
+    private javax.swing.JButton cancelButton;
+    private javax.swing.JButton goMosaicButton;
     private javax.swing.JButton heatmapButton;
-    private javax.swing.JButton jButton8;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -561,7 +607,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
     private javax.swing.JComboBox resultSwitchComboBox;
     private javax.swing.JTabbedPane resultTabbedPane;
     private javax.swing.JTable resultTable;
-    private javax.swing.JButton save2FileButton6;
+    private javax.swing.JButton save2FileButton;
     // End of variables declaration//GEN-END:variables
 
     public void mouseClicked(MouseEvent e) {
@@ -595,5 +641,22 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 
     public void mouseExited(MouseEvent e) {
         // TODO Auto-generated method stub
+    }
+
+    public void stateChanged(ChangeEvent e) {
+        int i = resultTabbedPane.getSelectedIndex();
+        if(i==0) {
+            heatmapButton.setEnabled(false);
+            heatmapButton.setVisible(false);
+            resultSwitchComboBox.setEnabled(true);
+            resultSwitchComboBox.setVisible(true);
+        } else {
+            if(new File(NOA.NOATempDir+heatmapFileName).exists()) {
+                heatmapButton.setEnabled(true);
+                heatmapButton.setVisible(true);
+            }
+            resultSwitchComboBox.setEnabled(false);
+            resultSwitchComboBox.setVisible(false);
+        }
     }
 }

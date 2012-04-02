@@ -88,7 +88,9 @@ class NOABatchEnrichmentTask implements Task {
             HashMap<String, Set<String>> goNodeRefMap = new HashMap<String, Set<String>>();
             HashMap<String, String> goNodeCountRefMap = new HashMap<String, String>();
             HashMap<String, String> resultMap = new HashMap<String, String>();
+            HashMap<String, String> topHitMap = new HashMap<String, String>();
             HashMap<String, ArrayList<String>> outputMap = new HashMap<String, ArrayList<String>>();
+            HashMap<String, String> outputTopMap = new HashMap<String, String>();
 
             Set<String> allNodeSet = new HashSet();
             Set<String> allEdgeSet = new HashSet();
@@ -261,6 +263,7 @@ class NOABatchEnrichmentTask implements Task {
                             //System.out.println(goNodeMap.size());
                             if(!eachGO.equals("unassigned")) {
                                 if(goNodeMap.containsKey(eachGO)) {
+                                    taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
                                     valueA = goNodeMap.get(eachGO).size();
                                     if(isWholeNet) {
                                         valueC = goNodeRefMap.get(eachGO).size();
@@ -293,6 +296,7 @@ class NOABatchEnrichmentTask implements Task {
                                 }
                             }
                         }
+                        taskMonitor.setStatus("Calculating corrected p-value ......");
                         if(corrMethod.equals("none")) {
 
                         } else if(corrMethod.equals(NOAStaticValues.CORRECTION_Benjam)) {
@@ -304,6 +308,8 @@ class NOABatchEnrichmentTask implements Task {
 //                            if(resultMap.containsKey(eachGO))
 //                                outputMap.put(eachGO.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length()));
 //                        }
+                        if(resultMap.containsKey(topGOID))
+                            outputTopMap.put(topGOID.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
                         for(Object eachGO : potentialGOList) {
                             if(resultMap.containsKey(eachGO)) {
                                 if(outputMap.containsKey(eachGO)) {
@@ -319,6 +325,7 @@ class NOABatchEnrichmentTask implements Task {
                             }
                         }
                     }
+                    taskMonitor.setStatus("Generating heatmap ......");
                     HeatChart chart = new HeatChart(pvalueMatrix);
                     chart.setHighValueColour(Color.GREEN);
                     chart.setLowValueColour(Color.RED);
@@ -331,7 +338,7 @@ class NOABatchEnrichmentTask implements Task {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
+                    taskMonitor.setStatus("Done!");
                 //Edge-base algorithm.
                 } else {
                     System.out.println("Counting edges for the whole clique......");
@@ -387,6 +394,7 @@ class NOABatchEnrichmentTask implements Task {
                         for(Object eachGO : potentialGOList) {
                             if(!eachGO.equals("unassigned")) {
                                 if(goNodeMap.containsKey(eachGO)) {
+                                    taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
                                     valueA = goNodeMap.get(eachGO).size();
                                     if(isWholeNet) {
                                         valueC = goNodeRefMap.get(eachGO).size();
@@ -420,6 +428,7 @@ class NOABatchEnrichmentTask implements Task {
                                 }
                             }
                         }
+                        //taskMonitor.setStatus("Calculating corrected p-value ......");
                         if(corrMethod.equals("none")) {
 
                         } else if(corrMethod.equals(NOAStaticValues.CORRECTION_Benjam)) {
@@ -427,6 +436,8 @@ class NOABatchEnrichmentTask implements Task {
                         } else {
                             resultMap = CorrectionMethod.calBonferCorrection(resultMap, resultMap.size(), pvalue);
                         }
+                        if(resultMap.containsKey(topGOID))
+                            outputTopMap.put(topGOID.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
                         for(Object eachGO : potentialGOList) {
                             if(resultMap.containsKey(eachGO)) {
                                 if(outputMap.containsKey(eachGO)) {
@@ -442,21 +453,22 @@ class NOABatchEnrichmentTask implements Task {
                             }
                         }
                     }
+                    taskMonitor.setStatus("Generating heatmap ......");
                     HeatChart chart = new HeatChart(pvalueMatrix);
                     chart.setHighValueColour(Color.GREEN);
                     chart.setLowValueColour(Color.RED);
                     chart.setXValues(go200List.toArray());
                     chart.setYValues(network200List.toArray());
                     tempHeatmapFileName = System.currentTimeMillis()+".png";
-                    System.out.println();
                     try {
                         chart.saveToFile(new File(NOA.NOATempDir+tempHeatmapFileName));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    taskMonitor.setStatus("Done!");
                 }
                 if(outputMap.size()>0){
-                    dialog = new MultipleOutputDialog(Cytoscape.getDesktop(), false, outputMap, this.algType, this.formatSign, recordCount, tempHeatmapFileName);
+                    dialog = new MultipleOutputDialog(Cytoscape.getDesktop(), false, outputMap, outputTopMap, this.algType, this.formatSign, recordCount, tempHeatmapFileName);
                     dialog.setLocationRelativeTo(Cytoscape.getDesktop());
                     dialog.setResizable(true);
                 } else {

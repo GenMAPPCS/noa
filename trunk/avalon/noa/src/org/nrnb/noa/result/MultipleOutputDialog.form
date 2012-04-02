@@ -47,15 +47,15 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="resultSwitchComboBox" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
                   <Component id="heatmapButton" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="219" max="32767" attributes="0"/>
-                  <Component id="save2FileButton6" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="resultSwitchComboBox" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="245" max="32767" attributes="0"/>
+                  <Component id="save2FileButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-                  <Component id="jButton8" min="-2" max="-2" attributes="0"/>
+                  <Component id="goMosaicButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-                  <Component id="cancelButton6" min="-2" max="-2" attributes="0"/>
+                  <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -65,9 +65,9 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="cancelButton6" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jButton8" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="save2FileButton6" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="cancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="goMosaicButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="save2FileButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="resultSwitchComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="heatmapButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -77,7 +77,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="save2FileButton6">
+        <Component class="javax.swing.JButton" name="save2FileButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="Save to ..."/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -94,7 +94,7 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="save2FileButtonActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="jButton8">
+        <Component class="javax.swing.JButton" name="goMosaicButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="Go to Mosaic"/>
           </Properties>
@@ -102,7 +102,7 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton2ActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="cancelButton6">
+        <Component class="javax.swing.JButton" name="cancelButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="Cancel"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -127,6 +127,7 @@
                 <StringItem index="1" value="All results"/>
               </StringArray>
             </Property>
+            <Property name="selectedIndex" type="int" value="1"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[95, 23]"/>
             </Property>
@@ -137,6 +138,9 @@
               <Dimension value="[95, 23]"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resultSwitchComboBoxActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="heatmapButton">
           <Properties>
@@ -159,9 +163,6 @@
       </SubComponents>
     </Container>
     <Container class="javax.swing.JTabbedPane" name="resultTabbedPane">
-      <Events>
-        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="resultTabbedPaneMouseClicked"/>
-      </Events>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
@@ -227,7 +228,7 @@
                       <Data value="3.4E-38"/>
                       <Data value="2.4E-4"/>
                     </Column>
-                    <Column editable="true" title="Desciption" type="java.lang.String">
+                    <Column editable="true" title="Description" type="java.lang.String">
                       <Data value="cell cycle process "/>
                       <Data value="chromatin "/>
                       <Data value="CCAAT-binding factor complex"/>
@@ -332,7 +333,7 @@
                       <Data value="MF"/>
                       <Data value="MF"/>
                     </Column>
-                    <Column editable="true" title="Desciption" type="java.lang.String">
+                    <Column editable="true" title="Description" type="java.lang.String">
                       <Data value="cell cycle process "/>
                       <Data value="regulation of transcription from RNA polymerase II promoter "/>
                       <Data value="positive regulation of transcription from RNA polymerase II promoter "/>

@@ -67,6 +67,7 @@ class NOASingleEnrichmentTask implements Task {
         try {
             taskMonitor.setPercentCompleted(-1);
             HashMap<String, Set<String>> goNodeMap = new HashMap<String, Set<String>>();
+            HashMap<String, Set<String>> goNode4EdgeAlgMap = new HashMap<String, Set<String>>();
             HashMap<String, String> goNodeCountRefMap = new HashMap<String, String>();
             HashMap<String, String> resultMap = new HashMap<String, String>();
             long start=System.currentTimeMillis();
@@ -158,6 +159,14 @@ class NOASingleEnrichmentTask implements Task {
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.BP_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.CC_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.MF_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
+
+                Set<CyNode> selectedNodesSet = Cytoscape.getCurrentNetwork().getSelectedNodes();                
+                if(!isSubnet)
+                    selectedNodesSet = new HashSet<CyNode>(Cytoscape.getCurrentNetwork().nodesList());
+                NOAUtil.retrieveNodeAttribute(NOAStaticValues.BP_ATTNAME, selectedNodesSet, goNode4EdgeAlgMap);
+                NOAUtil.retrieveNodeAttribute(NOAStaticValues.CC_ATTNAME, selectedNodesSet, goNode4EdgeAlgMap);
+                NOAUtil.retrieveNodeAttribute(NOAStaticValues.MF_ATTNAME, selectedNodesSet, goNode4EdgeAlgMap);
+
                 if(isWholeNet) {
                     //Step 2: count no of nodes for "whole net", save annotation mapping file into memory
                     taskMonitor.setStatus("Counting edges for the whole network ......");
@@ -198,9 +207,10 @@ class NOASingleEnrichmentTask implements Task {
                     taskMonitor.setStatus("Counting edges for the whole clique......");
                     int numOfNode = Cytoscape.getCurrentNetwork().getNodeCount();
                     int totalEdgesInClique = numOfNode*(numOfNode-1)/2;
-                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.BP_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
-                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.CC_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
-                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.MF_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+//                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.BP_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+//                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.CC_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+//                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.MF_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
+                    NOAUtil.retrieveAllEdgeCountMap(goNode4EdgeAlgMap, goNodeCountRefMap, potentialGOList, this.edgeAnnotation, numOfNode);
                     for(Object eachGO : potentialGOList) {
                         if(!eachGO.equals("unassigned")) {
                             taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
