@@ -23,11 +23,19 @@ package org.nrnb.noa.utils;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.util.Iterator;
 
 import javax.imageio.*;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
+import org.freehep.graphicsio.svg.SVGGraphics2D;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 /**
  * The <code>HeatChart</code> class describes a chart which can display 
@@ -252,7 +260,7 @@ public class HeatChart {
 		
 		// Default title settings.
 		this.title = null;
-		this.titleFont = new Font("Sans-Serif", Font.BOLD, 16);
+		this.titleFont = new Font("Sans-Serif", Font.BOLD, 18);
 		this.titleColour = Color.BLACK;
 		
 		// Default axis settings.
@@ -260,10 +268,10 @@ public class HeatChart {
 		this.yAxisLabel = null;
 		this.axisThickness = 2;
 		this.axisColour = Color.BLACK;
-		this.axisLabelsFont = new Font("Sans-Serif", Font.PLAIN, 12);
+		this.axisLabelsFont = new Font("Sans-Serif", Font.PLAIN, 16);
 		this.axisLabelColour = Color.BLACK;
 		this.axisValuesColour = Color.BLACK;
-		this.axisValuesFont = new Font("Sans-Serif", Font.PLAIN, 10);
+		this.axisValuesFont = new Font("Monospaced", Font.BOLD, 14);
 		this.xAxisValuesFrequency = 1;
 		this.xAxisValuesHeight = 0;
 		this.xValuesHorizontal = false;
@@ -1256,11 +1264,20 @@ public class HeatChart {
 			BufferedImage chart = (BufferedImage) getChartImage(false);
 
 			// Save our graphic.
-			saveGraphicJpeg(chart, outputFile, 1.0f);
-		} else {
+			saveGraphicJpeg(chart, outputFile, 0.0f);
+//		} else if (ext.toLowerCase().equals("svg")){
+//            BufferedImage chart = (BufferedImage) getChartImage(true);
+//            SVGGraphics2D svgGenerator = new SVGGraphics2D(outputFile, new Dimension(chart.getWidth(), chart.getHeight()));
+//            System.out.println(chart.getWidth()+" "+chart.getHeight());
+//            writePngFile(chart,outputFile,300);
+//            svgGenerator.startExport();
+//            svgGenerator.drawImage(chart, 0,0,chart.getWidth(), chart.getHeight(), null);
+//            svgGenerator.endExport();
+        } else {
 			BufferedImage chart = (BufferedImage) getChartImage(true);
 			
-			ImageIO.write(chart, ext, outputFile);
+			//ImageIO.write(chart, ext, outputFile);
+            writePngFile(chart,outputFile,300);
 		}
 	}
 	
@@ -1280,7 +1297,118 @@ public class HeatChart {
 		writer.dispose();
 		
 	}
-	
+    
+    private void writePngFile(RenderedImage image, File filename, int dotsPerInch) {
+        String dotsPerMeter = String.valueOf((int) (dotsPerInch / 0.0254));
+        // retrieve list of ImageWriters for png images (most likely only one but who knows)
+        Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByFormatName("png");
+        // loop through available ImageWriters until one succeeds
+        while (imageWriters.hasNext()) {
+            ImageWriter iw = imageWriters.next();
+            // get default metadata for png files
+            ImageWriteParam iwp = iw.getDefaultWriteParam();
+            IIOMetadata metadata = iw.getDefaultImageMetadata(new ImageTypeSpecifier(image), iwp);
+            // get png specific metatdata tree
+            String pngFormatName = metadata.getNativeMetadataFormatName();
+            IIOMetadataNode pngNode = (IIOMetadataNode) metadata.getAsTree(pngFormatName);
+            // find pHYs node, or create it if it doesn't exist
+            IIOMetadataNode physNode = null;
+            NodeList childNodes = pngNode.getElementsByTagName("pHYs");
+            if (childNodes.getLength() == 0) {
+                physNode = new IIOMetadataNode("pHYs");
+                pngNode.appendChild(physNode);
+            } else if (childNodes.getLength() == 1) {
+                physNode = (IIOMetadataNode) childNodes.item(0);
+            } else {
+                throw new IllegalStateException("Don't know what to do with multiple pHYs nodes");
+            }
+            physNode.setAttribute("pixelsPerUnitXAxis", dotsPerMeter);
+            physNode.setAttribute("pixelsPerUnitYAxis", dotsPerMeter);
+            physNode.setAttribute("unitSpecifier", "meter");
+            try {
+                metadata.setFromTree(pngFormatName, pngNode);
+                IIOImage iioImage = new IIOImage(image, null, metadata);
+                ImageOutputStream ios = ImageIO.createImageOutputStream(filename);
+                iw.setOutput(ios);
+                iw.write(iioImage);
+                ios.flush();
+                ios.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+            break;
+        }
+    }
+//
+//
+//
+//    public TiffOutput(RenderedImage image, String outputFilePath, int dpi) {
+//        try {
+//            if (image != null) {
+//                TIFFEncodeParam param = new TIFFEncodeParam();
+//                param.setCompression(TIFFEncodeParam.COMPRESSION_NONE);
+//                TIFFField[] extras = new TIFFField[2];
+//                extras[0] = new TIFFField(282, TIFFTag.TIFF_RATIONAL, 1, (Object) new long[][]{{(long) dpi, 1}, {0, 0}});
+//                extras[1] = new TIFFField(283, TIFFTag.TIFF_RATIONAL, 1, (Object) new long[][]{{(long) dpi, 1}, {0, 0}});
+//                param.setExtraFields(extras);
+//                File outputFile = new File(outputFilePath);
+//                outputFile.createNewFile();
+//                FileOutputStream outputStream = new FileOutputStream(outputFile);
+//                TIFFImageEncoder encoder = new TIFFImageEncoder(outputStream, param);
+//                encoder.encode(image);
+//                outputStream.close();
+//            }
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        }
+//    }
+	/**
+	 * Generates and returns a new chart <code>Image</code> configured
+	 * according to this object's currently held settings. The given parameter
+	 * determines whether transparency should be enabled for the generated
+	 * image.
+	 *
+	 * <p>
+	 * No chart will be generated until this or the related
+	 * <code>saveToFile(File)</code> method are called. All successive calls
+	 * will result in the generation of a new chart image, no caching is used.
+	 *
+	 * @param alpha whether to enable transparency.
+	 * @return A newly generated chart <code>Image</code>. The returned image
+	 * is a <code>BufferedImage</code>.
+	 */
+	public void drawChartSVG(Graphics2D svgGenerator) {
+		// Calculate all unknown dimensions.
+		measureComponents();
+		updateCoordinates();
+
+		// Use anti-aliasing where ever possible.
+		svgGenerator.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+									   RenderingHints.VALUE_ANTIALIAS_ON);
+
+		// Set the background.
+		svgGenerator.setColor(backgroundColour);
+		svgGenerator.fillRect(0, 0, chartSize.width, chartSize.height);
+
+		// Draw the title.
+		drawTitle(svgGenerator);
+
+		// Draw the heatmap image.
+		drawHeatMap(svgGenerator, zValues);
+
+		// Draw the axis labels.
+		drawXLabel(svgGenerator);
+		drawYLabel(svgGenerator);
+
+		// Draw the axis bars.
+		drawAxisBars(svgGenerator);
+
+		// Draw axis values.
+		drawXValues(svgGenerator);
+		drawYValues(svgGenerator);
+	}
+
 	/**
 	 * Generates and returns a new chart <code>Image</code> configured 
 	 * according to this object's currently held settings. The given parameter 
@@ -1614,7 +1742,7 @@ public class HeatChart {
 				
 				chartGraphics.drawString(xValueStr, valueXPos, valueYPos);
 			} else {
-				int valueXPos = heatMapTL.x + (i * cellSize.width) + ((cellSize.width / 2) + (xAxisValuesHeight / 2));
+				int valueXPos = heatMapTL.x + (i * cellSize.width) + ((cellSize.width / 2) + (xAxisValuesHeight / 2)) - 3;
 				int valueYPos = heatMapBR.y + axisThickness + valueWidth;
 				
 				// Create 270 degree rotated transform.

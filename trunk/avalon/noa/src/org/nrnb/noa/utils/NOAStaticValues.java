@@ -31,10 +31,11 @@ public class NOAStaticValues {
     public static final String EDGE_Union = "Union";
     public static final String STAT_Hypergeo = "Hyper-geometry";
     public static final String STAT_Fisher = "Fisher exact test";
+    public static final String STAT_ZScore = "z-score";
     public static final String CORRECTION_Bonfer = "Bonferroni";
     public static final String CORRECTION_Benjam = "Benjamini & Hochberg q value";
     public static final int NETWORK_FORMAT  = 1;
     public static final int SET_FORMAT  = 2;
     public static final int WRONG_FORMAT  = -1;
-    public static final double LOG_PVALUE_CUTOFF = -20.0;
+    public static final double LOG_PVALUE_CUTOFF = -10.0;
 }

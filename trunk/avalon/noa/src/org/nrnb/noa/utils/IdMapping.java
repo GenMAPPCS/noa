@@ -43,6 +43,8 @@ public class IdMapping {
     }
 
     public static List<String> getSourceTypes() {
+        String[] excludeTerms = new String[]{"DESCRIPTION", "TYPE", "CHROMOSOME", "OMIM", "IPI", "GENEWIKI", "SYNONYMS", "GENEONTOLOGY", "RFAM"};
+        List excludeList = Arrays.asList(excludeTerms);
         Map<String, Object> noargs = new HashMap<String, Object>();
         CyCommandResult result = null;
         try {
@@ -59,7 +61,8 @@ public class IdMapping {
             //System.out.println(result.getResult().toString());
             Set<String> idTypes = (Set<String>) result.getResult();
             for(String t : idTypes) {
-                sourceIDTypes.add(t);
+                if(excludeList.indexOf(t.toUpperCase())==-1)
+                    sourceIDTypes.add(t);
             }
         }
         return sourceIDTypes;

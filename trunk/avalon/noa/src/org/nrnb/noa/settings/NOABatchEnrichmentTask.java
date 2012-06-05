@@ -23,8 +23,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +34,7 @@ import javax.swing.JOptionPane;
 import org.nrnb.noa.NOA;
 import org.nrnb.noa.algorithm.CorrectionMethod;
 import org.nrnb.noa.algorithm.StatMethod;
+import org.nrnb.noa.algorithm.ChiSquareDist;
 import org.nrnb.noa.result.MultipleOutputDialog;
 import org.nrnb.noa.utils.HeatChart;
 import org.nrnb.noa.utils.IdMapping;
@@ -61,11 +60,14 @@ class NOABatchEnrichmentTask implements Task {
     private int formatSign = 0;
     private ArrayList<String> networkNameArray = new ArrayList<String>();
     private String tempHeatmapFileName = "";
+    private int networkSize = 100;
+    private int goSize = 100;
+    private final int TOTAL_GO = 10000;
     
     public NOABatchEnrichmentTask(boolean isEdge, String inputFilePath,
             boolean isWholeNet, Object edgeAnnotation, Object statMethod,
             Object corrMethod, Object pvalue, String speciesDerbyFile,
-            String speciesGOFile, Object idType, String ensemblType) {
+            String speciesGOFile, Object idType, String ensemblType, int formatSign) {
         if(isEdge)
             this.algType = NOAStaticValues.Algorithm_EDGE;
         else
@@ -80,15 +82,16 @@ class NOABatchEnrichmentTask implements Task {
         this.speciesGOFile = speciesGOFile;
         this.idType = idType;
         this.ensemblIDType = ensemblType;
+        this.formatSign = formatSign;
     }
 
     public void run() {
-        try {
+        try {            
             taskMonitor.setPercentCompleted(-1);
             HashMap<String, Set<String>> goNodeRefMap = new HashMap<String, Set<String>>();
             HashMap<String, String> goNodeCountRefMap = new HashMap<String, String>();
             HashMap<String, String> resultMap = new HashMap<String, String>();
-            HashMap<String, String> topHitMap = new HashMap<String, String>();
+            //HashMap<String, String> topHitMap = new HashMap<String, String>();
             HashMap<String, ArrayList<String>> outputMap = new HashMap<String, ArrayList<String>>();
             HashMap<String, String> outputTopMap = new HashMap<String, String>();
 
@@ -189,7 +192,7 @@ class NOABatchEnrichmentTask implements Task {
                 Map<String, Set<String>>[] idGOMapArray = idMapper.mapID2Array(
                     this.speciesDerbyFile, this.speciesGOFile, nodeList,
                     this.idType.toString(), this.ensemblIDType);
-                Set<String> networkList = tempDataArray.keySet();
+                //Set<String> networkList = tempDataArray.keySet();
                 taskMonitor.setStatus("Obtaining GO list from test networks ......");
                 Set<String> GOList = idMapper.convertSetMapValueToSet(idGOMapArray[0]);
                 GOList.addAll(idMapper.convertSetMapValueToSet(idGOMapArray[1]));
@@ -201,15 +204,17 @@ class NOABatchEnrichmentTask implements Task {
                 int valueD = 0;
                 int recordCount = 0;
 
+//                //Pick first 200 networks
+//                List network200List = new ArrayList();
+//                if(networkNameArray.size()>200){
+//                    for(int i=0;i<200;i++)
+//                        network200List.add(networkNameArray.get(i));
+//                } else {
+//                    network200List = networkNameArray;
+//                }
                 //Pick first 200 networks
-                List network200List = new ArrayList();
-                if(networkNameArray.size()>200){
-                    for(int i=0;i<200;i++)
-                        network200List.add(networkNameArray.get(i));
-                } else {
-                    network200List = networkNameArray;
-                }
-                
+                List network200List = networkNameArray;
+               
                 //Node-base algorithm
                 if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {                    
                     taskMonitor.setStatus("Counting nodes for the whole network ......");
@@ -220,18 +225,28 @@ class NOABatchEnrichmentTask implements Task {
                         valueD = NOAUtil.retrieveAllNodeCountMap(speciesGOFile, goNodeCountRefMap, potentialGOList);
                     }
 
+//                    //Pick the most specific 200 GO IDs
+//                    List go200List = new ArrayList();
+//                    if(potentialGOList.size()>200) {
+//                        Collections.sort(potentialGOList);
+//                        if(potentialGOList.get(potentialGOList.size()-1).equals("unassigned"))
+//                            potentialGOList.remove("unassigned");
+//                        for(int i=potentialGOList.size()-1;i>=potentialGOList.size()-200;i--)
+//                            go200List.add(potentialGOList.get(i));
+//                    } else {
+//                        go200List = potentialGOList;
+//                    }
+//                    double[][] pvalueMatrix = new double[network200List.size()][go200List.size()];
+//                    for(int i=0;i<pvalueMatrix.length;i++) {
+//                        for(int j=0;j<pvalueMatrix[0].length;j++) {
+//                            pvalueMatrix[i][j] = 0;
+//                        }
+//                    }
                     //Pick the most specific 200 GO IDs
-                    List go200List = new ArrayList();
-                    if(potentialGOList.size()>200) {
-                        Collections.sort(potentialGOList);
-                        if(potentialGOList.get(potentialGOList.size()-1).equals("unassigned"))
-                            potentialGOList.remove("unassigned");
-                        for(int i=potentialGOList.size()-1;i>=potentialGOList.size()-200;i--)
-                            go200List.add(potentialGOList.get(i));
-                    } else {
-                        go200List = potentialGOList;
-                    }
-                    double[][] pvalueMatrix = new double[network200List.size()][go200List.size()];
+                    List go200List = potentialGOList;
+                    double[][] sumPvaluePerGO = new double[go200List.size()][2];
+                    double[][] sumPvaluePerNetwork = new double[network200List.size()][2];
+                    double[][] pvalueMatrix = new double[network200List.size()+1][go200List.size()];
                     for(int i=0;i<pvalueMatrix.length;i++) {
                         for(int j=0;j<pvalueMatrix[0].length;j++) {
                             pvalueMatrix[i][j] = 0;
@@ -239,7 +254,7 @@ class NOABatchEnrichmentTask implements Task {
                     }
                     
                     //Calculate p-value for each network
-                    for(String networkID : networkList) {
+                    for(String networkID : networkNameArray) {
                         resultMap = new HashMap<String, String>();
                         ArrayList detail = tempDataArray.get(networkID);
                         Set<String> testNodeSet = new HashSet();
@@ -275,16 +290,23 @@ class NOABatchEnrichmentTask implements Task {
                                         pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                                     } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
                                         pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                                    } else if(statMethod.equals(NOAStaticValues.STAT_ZScore)) {
+                                        pvalue = StatMethod.calZScorePValue(valueA, valueB, valueC, valueD);
                                     } else {
                                         pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                                     }
                                     int n = go200List.indexOf(eachGO);
                                     int m = network200List.indexOf(networkID);
                                     if(m!=-1&&n!=-1) {
-                                        if(Math.log(pvalue)<NOAStaticValues.LOG_PVALUE_CUTOFF)
-                                            pvalueMatrix[m][n] = NOAStaticValues.LOG_PVALUE_CUTOFF;
-                                        else
-                                            pvalueMatrix[m][n] = Math.log(pvalue);
+//                                        if(Math.log(pvalue)<NOAStaticValues.LOG_PVALUE_CUTOFF)
+//                                            pvalueMatrix[m][n] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+//                                        else
+                                        pvalueMatrix[m][n] = Math.log(pvalue);
+                                        pvalueMatrix[network200List.size()][n] += -2.0*Math.log(pvalue);
+                                        sumPvaluePerGO[n][0] = n;
+                                        sumPvaluePerGO[n][1] += -2.0*Math.log(pvalue);
+                                        sumPvaluePerNetwork[m][0] = m;
+                                        sumPvaluePerNetwork[m][1] += -2.0*Math.log(pvalue);
                                     }
                                     if(pvalue<=this.pvalue) {
                                         resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
@@ -309,7 +331,7 @@ class NOABatchEnrichmentTask implements Task {
 //                                outputMap.put(eachGO.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length()));
 //                        }
                         if(resultMap.containsKey(topGOID))
-                            outputTopMap.put(topGOID.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
+                            outputTopMap.put(topGOID.toString()+"\t"+networkID.substring(1,networkID.length()), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
                         for(Object eachGO : potentialGOList) {
                             if(resultMap.containsKey(eachGO)) {
                                 if(outputMap.containsKey(eachGO)) {
@@ -325,14 +347,121 @@ class NOABatchEnrichmentTask implements Task {
                             }
                         }
                     }
+                    int countPvalue = 0;
+                    for(int i=0;i<go200List.size();i++) {
+                        //System.out.println(pvalueMatrix[network200List.size()][i]);
+                        pvalueMatrix[network200List.size()][i] = 1.0-ChiSquareDist.chiSquareCDF(pvalueMatrix[network200List.size()][i], network200List.size()*2);
+                        if(pvalueMatrix[network200List.size()][i]<=0.05){
+                            countPvalue++;
+                        }
+                        //System.out.println(pvalueMatrix[network200List.size()][i]);
+                        //System.out.println(network200List.size()*2);
+                    }
+                    //int networkSize = 100;
+//                    if(network200List.size()<networkSize)
+//                        networkSize = network200List.size();
+//                    //int goSize = 100;
+//                    if(countPvalue<goSize)
+//                        goSize = countPvalue;
+//                    double[][] heatmapPvalueMatrix = new double[networkSize][goSize];
+//                    List heatmapGOList = new ArrayList();
+//                    List heatmapNetworkList = new ArrayList();
+//                    countPvalue = 0;
+//                    for(int i=0;i<go200List.size();i++) {
+//                        if(pvalueMatrix[network200List.size()][i]<=0.05){
+//                            heatmapGOList.add(go200List.get(i));
+//                            for(int j=0;j<networkSize;j++) {
+//                                if(heatmapNetworkList.indexOf(network200List.get(j))==-1)
+//                                    heatmapNetworkList.add(network200List.get(j));
+//                                if(pvalueMatrix[j][i]<NOAStaticValues.LOG_PVALUE_CUTOFF)
+//                                    heatmapPvalueMatrix[j][countPvalue] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+//                                else
+//                                    heatmapPvalueMatrix[j][countPvalue] = pvalueMatrix[j][i];
+//                            }
+//                            countPvalue++;
+//                            if(countPvalue>=goSize)
+//                                break;
+//                        }
+//                    }
+
+                    if(network200List.size()<networkSize)
+                        networkSize = network200List.size();
+                    //int goSize = 100;
+                    if(countPvalue<goSize)
+                        goSize = countPvalue;
+                    double[][] heatmapPvalueMatrix = new double[networkSize][goSize];
+                    sumPvaluePerGO = NOAUtil.dataSort(sumPvaluePerGO, 1 ,1);
+                    sumPvaluePerNetwork = NOAUtil.dataSort(sumPvaluePerNetwork, 1);
+                    List heatmapGOList = new ArrayList();
+                    List heatmapNetworkList = new ArrayList();
+                    countPvalue = 0;
+                    for(int i=0;i<go200List.size();i++) {
+                        int idxOfGO = (int)sumPvaluePerGO[i][0];
+                        //if(pvalueMatrix[network200List.size()][i]<=0.05){
+                        if(pvalueMatrix[network200List.size()][idxOfGO]<=0.05){
+                            heatmapGOList.add(go200List.get(idxOfGO));
+                            for(int j=0;j<networkSize;j++) {
+                                int idxOfNetwrok = (int)sumPvaluePerNetwork[j][0];
+                                if(heatmapNetworkList.indexOf(network200List.get(idxOfNetwrok))==-1)
+                                    heatmapNetworkList.add(network200List.get(idxOfNetwrok));
+                                if(pvalueMatrix[idxOfNetwrok][idxOfGO]<NOAStaticValues.LOG_PVALUE_CUTOFF)
+                                    heatmapPvalueMatrix[j][countPvalue] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+                                else
+                                    heatmapPvalueMatrix[j][countPvalue] = pvalueMatrix[idxOfNetwrok][idxOfGO];
+                            }
+                            countPvalue++;
+                            if(countPvalue>=goSize)
+                                break;
+                        }
+                    }
+                    
+                    double[][] sortedHeatmapPvalueMatrix = new double[networkSize][goSize];
+                    double[][] sumPvaluePerGO1 = new double[goSize][2];
+                    double[][] sumPvaluePerNetwork1 = new double[networkSize][2];
+                    for(int i=0;i<goSize;i++) {
+                        sumPvaluePerGO1[i][0] = i;
+                        for(int j=0;j<networkSize;j++) {
+                            sumPvaluePerNetwork1[j][0] = j;
+                            sumPvaluePerGO1[i][1] += -2*heatmapPvalueMatrix[j][i];
+                            sumPvaluePerNetwork1[j][1] += -2*heatmapPvalueMatrix[j][i];
+                        }
+                    }
+
+                    sumPvaluePerGO1 = NOAUtil.dataSort(sumPvaluePerGO1, 1, 1);
+                    sumPvaluePerNetwork1 = NOAUtil.dataSort(sumPvaluePerNetwork1, 1);
+                    List heatmapGOList1 = new ArrayList();
+                    List heatmapNetworkList1 = new ArrayList();
+                    for(int i=0;i<goSize;i++) {
+                        heatmapGOList1.add(heatmapGOList.get((int)sumPvaluePerGO1[i][0]));
+                        for(int j=0;j<networkSize;j++) {
+                            sortedHeatmapPvalueMatrix[j][i] = heatmapPvalueMatrix[(int)sumPvaluePerNetwork1[j][0]][(int)sumPvaluePerGO1[i][0]];
+                        }
+                    }
+                    for(int j=0;j<networkSize;j++) {
+                        heatmapNetworkList1.add(heatmapNetworkList.get((int)sumPvaluePerNetwork1[j][0]));
+                    }
+
+                    pvalueMatrix = null;
+                    System.gc();
+                    //Mapping GO term to description
+                    Object[] go4Display = new Object[goSize];
+                    Map<String, String> goDescMap = NOAUtil.readMappingFile(this.getClass().getResource(NOAStaticValues.GO_DescFile), heatmapGOList1, 0);
+                    for(int i=0;i<goSize;i++){
+                        if(goDescMap.containsKey(heatmapGOList1.get(i).toString())) {
+                            go4Display[i] = goDescMap.get(heatmapGOList1.get(i).toString());
+                            if(go4Display[i].toString().length()>23)
+                                go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+                        } else {
+                            go4Display[i] = heatmapGOList1.get(i);
+                        }
+                    }
                     taskMonitor.setStatus("Generating heatmap ......");
-                    HeatChart chart = new HeatChart(pvalueMatrix);
-                    chart.setHighValueColour(Color.GREEN);
-                    chart.setLowValueColour(Color.RED);
-                    chart.setXValues(go200List.toArray());
-                    chart.setYValues(network200List.toArray());
+                    HeatChart chart = new HeatChart(sortedHeatmapPvalueMatrix);
+                    chart.setHighValueColour(Color.BLUE);
+                    chart.setLowValueColour(Color.YELLOW);
+                    chart.setXValues(go4Display);
+                    chart.setYValues(heatmapNetworkList.toArray());
                     tempHeatmapFileName = System.currentTimeMillis()+".png";
-                    System.out.println();
                     try {
                         chart.saveToFile(new File(NOA.NOATempDir+tempHeatmapFileName));
                     } catch (Exception e) {
@@ -345,18 +474,28 @@ class NOABatchEnrichmentTask implements Task {
                     taskMonitor.setStatus("Counting edges for the whole clique......");
                     NOAUtil.retrieveEdgeCountMapBatchMode(idGOMapArray, allEdgeSet, goNodeRefMap, potentialGOList, this.edgeAnnotation);
                     
+//                    //Pick the most specific 200 GO IDs
+//                    List go200List = new ArrayList();
+//                    if(potentialGOList.size()>200) {
+//                        Collections.sort(potentialGOList);
+//                        if(potentialGOList.get(potentialGOList.size()-1).equals("unassigned"))
+//                            potentialGOList.remove("unassigned");
+//                        for(int i=potentialGOList.size()-1;i>=potentialGOList.size()-200;i--)
+//                            go200List.add(potentialGOList.get(i));
+//                    } else {
+//                        go200List = potentialGOList;
+//                    }
+//                    double[][] pvalueMatrix = new double[network200List.size()][go200List.size()];
+//                    for(int i=0;i<pvalueMatrix.length;i++) {
+//                        for(int j=0;j<pvalueMatrix[0].length;j++) {
+//                            pvalueMatrix[i][j] = 0;
+//                        }
+//                    }
                     //Pick the most specific 200 GO IDs
-                    List go200List = new ArrayList();
-                    if(potentialGOList.size()>200) {
-                        Collections.sort(potentialGOList);
-                        if(potentialGOList.get(potentialGOList.size()-1).equals("unassigned"))
-                            potentialGOList.remove("unassigned");
-                        for(int i=potentialGOList.size()-1;i>=potentialGOList.size()-200;i--)
-                            go200List.add(potentialGOList.get(i));
-                    } else {
-                        go200List = potentialGOList;
-                    }
-                    double[][] pvalueMatrix = new double[network200List.size()][go200List.size()];
+                    List go200List = potentialGOList;
+                    double[][] sumPvaluePerGO = new double[go200List.size()][2];
+                    double[][] sumPvaluePerNetwork = new double[network200List.size()][2];
+                    double[][] pvalueMatrix = new double[network200List.size()+1][go200List.size()];
                     for(int i=0;i<pvalueMatrix.length;i++) {
                         for(int j=0;j<pvalueMatrix[0].length;j++) {
                             pvalueMatrix[i][j] = 0;
@@ -364,7 +503,7 @@ class NOABatchEnrichmentTask implements Task {
                     }
                     
                     //Calculate p-value for each network
-                    for(String networkID : networkList) {
+                    for(String networkID : networkNameArray) {
                         //System.out.println(networkID);
                         resultMap = new HashMap<String, String>();
                         ArrayList detail = tempDataArray.get(networkID);
@@ -406,16 +545,23 @@ class NOABatchEnrichmentTask implements Task {
                                         pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                                     } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
                                         pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                                    } else if(statMethod.equals(NOAStaticValues.STAT_ZScore)) {
+                                        pvalue = StatMethod.calZScorePValue(valueA, valueB, valueC, valueD);
                                     } else {
                                         pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                                     }
                                     int n = go200List.indexOf(eachGO);
                                     int m = network200List.indexOf(networkID);
                                     if(m!=-1&&n!=-1) {
-                                        if(Math.log(pvalue)<NOAStaticValues.LOG_PVALUE_CUTOFF)
-                                            pvalueMatrix[m][n] = NOAStaticValues.LOG_PVALUE_CUTOFF;
-                                        else
-                                            pvalueMatrix[m][n] = Math.log(pvalue);
+//                                        if(Math.log(pvalue)<NOAStaticValues.LOG_PVALUE_CUTOFF)
+//                                            pvalueMatrix[m][n] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+//                                        else
+                                        pvalueMatrix[m][n] = Math.log(pvalue);
+                                        pvalueMatrix[network200List.size()][n] += -2.0*Math.log(pvalue);
+                                        sumPvaluePerGO[n][0] = n;
+                                        sumPvaluePerGO[n][1] += -2.0*Math.log(pvalue);
+                                        sumPvaluePerNetwork[m][0] = m;
+                                        sumPvaluePerNetwork[m][1] += -2.0*Math.log(pvalue);
                                     }
                                     //System.out.println(eachGO+": "+pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
                                     if(pvalue<=this.pvalue) {
@@ -437,7 +583,8 @@ class NOABatchEnrichmentTask implements Task {
                             resultMap = CorrectionMethod.calBonferCorrection(resultMap, resultMap.size(), pvalue);
                         }
                         if(resultMap.containsKey(topGOID))
-                            outputTopMap.put(topGOID.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
+                            //outputTopMap.put(topGOID.toString(), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
+                            outputTopMap.put(topGOID.toString()+"\t"+networkID.substring(1,networkID.length()), resultMap.get(topGOID).toString()+"\t"+networkID.substring(1,networkID.length())+"\t"+goNodeMap.get(topGOID));
                         for(Object eachGO : potentialGOList) {
                             if(resultMap.containsKey(eachGO)) {
                                 if(outputMap.containsKey(eachGO)) {
@@ -453,13 +600,166 @@ class NOABatchEnrichmentTask implements Task {
                             }
                         }
                     }
+                    int countPvalue = 0;
+                    for(int i=0;i<go200List.size();i++) {
+                        pvalueMatrix[network200List.size()][i] = 1.0-ChiSquareDist.chiSquareCDF(pvalueMatrix[network200List.size()][i], network200List.size()*2);
+                        if(pvalueMatrix[network200List.size()][i]<=0.05){
+                            countPvalue++;
+                        }
+                    }
+//                    double[][] heatmapPvalueMatrix = new double[network200List.size()][countPvalue];
+//                    List heatmapGOList = new ArrayList();
+//                    countPvalue = 0;
+//                    for(int i=0;i<go200List.size();i++) {
+//                        if(pvalueMatrix[network200List.size()][i]<=0.05){
+//                            heatmapGOList.add(go200List.get(i));
+//                            for(int j=0;j<network200List.size();j++) {
+//                                 if(pvalueMatrix[j][i]<NOAStaticValues.LOG_PVALUE_CUTOFF)
+//                                    heatmapPvalueMatrix[j][countPvalue] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+//                                else
+//                                    heatmapPvalueMatrix[j][countPvalue] = pvalueMatrix[j][i];
+//                            }
+//                            countPvalue++;
+//                        }
+//                    }
+                    //int networkSize = 100;
+//                    if(network200List.size()<networkSize)
+//                        networkSize = network200List.size();
+//                    //int goSize = 100;
+//                    if(countPvalue<goSize)
+//                        goSize = countPvalue;
+//                    double[][] heatmapPvalueMatrix = new double[networkSize][goSize];
+//                    List heatmapGOList = new ArrayList();
+//                    List heatmapNetworkList = new ArrayList();
+//                    countPvalue = 0;
+//                    for(int i=0;i<go200List.size();i++) {
+//                        if(pvalueMatrix[network200List.size()][i]<=0.05){
+//                            heatmapGOList.add(go200List.get(i));
+//                            for(int j=0;j<networkSize;j++) {
+//                                if(heatmapNetworkList.indexOf(network200List.get(j))==-1)
+//                                    heatmapNetworkList.add(network200List.get(j));
+//                                if(pvalueMatrix[j][i]<NOAStaticValues.LOG_PVALUE_CUTOFF)
+//                                    heatmapPvalueMatrix[j][countPvalue] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+//                                else
+//                                    heatmapPvalueMatrix[j][countPvalue] = pvalueMatrix[j][i];
+//                            }
+//                            countPvalue++;
+//                            if(countPvalue>=goSize)
+//                                break;
+//                        }
+//                    }
+////                    for(int i=0;i<go200List.size();i++){
+////                        System.out.print(go200List.get(i)+"\t");
+////                        for(int j=0;j<network200List.size()+1;j++){
+////                            System.out.print(pvalueMatrix[j][i]+"\t");
+////                        }
+////                        System.out.print("\n");
+////                    }
+//                    pvalueMatrix = null;
+//                    System.gc();
+//                    //Mapping GO term to description
+//                    Object[] go4Display = new Object[heatmapGOList.size()];
+//                    Map<String, String> goDescMap = NOAUtil.readMappingFile(this.getClass().getResource(NOAStaticValues.GO_DescFile), heatmapGOList, 0);
+//                    for(int i=0;i<heatmapGOList.size();i++){
+//                        if(goDescMap.containsKey(heatmapGOList.get(i).toString())) {
+//                            go4Display[i] = goDescMap.get(heatmapGOList.get(i).toString());
+//                            if(go4Display[i].toString().length()>23)
+//                                go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+//                        } else {
+//                            go4Display[i] = heatmapGOList.get(i);
+//                        }
+//                    }
+//                    taskMonitor.setStatus("Generating heatmap ......");
+//                    HeatChart chart = new HeatChart(heatmapPvalueMatrix);
+//                    chart.setHighValueColour(Color.BLUE);
+//                    chart.setLowValueColour(Color.YELLOW);
+//                    chart.setXValues(go4Display);
+//                    chart.setYValues(heatmapNetworkList.toArray());
+////                    HeatChart chart = new HeatChart(pvalueMatrix);
+////                    chart.setHighValueColour(Color.GREEN);
+////                    chart.setLowValueColour(Color.RED);
+////                    chart.setXValues(go200List.toArray());
+////                    chart.setYValues(network200List.toArray());
+//                    tempHeatmapFileName = System.currentTimeMillis()+".png";
+                    if(network200List.size()<networkSize)
+                        networkSize = network200List.size();
+                    //int goSize = 100;
+                    if(countPvalue<goSize)
+                        goSize = countPvalue;
+                    double[][] heatmapPvalueMatrix = new double[networkSize][goSize];
+                    sumPvaluePerGO = NOAUtil.dataSort(sumPvaluePerGO, 1 ,1);
+                    sumPvaluePerNetwork = NOAUtil.dataSort(sumPvaluePerNetwork, 1);
+                    List heatmapGOList = new ArrayList();
+                    List heatmapNetworkList = new ArrayList();
+                    countPvalue = 0;
+                    for(int i=0;i<go200List.size();i++) {
+                        int idxOfGO = (int)sumPvaluePerGO[i][0];
+                        //if(pvalueMatrix[network200List.size()][i]<=0.05){
+                        if(pvalueMatrix[network200List.size()][idxOfGO]<=0.05){
+                            heatmapGOList.add(go200List.get(idxOfGO));
+                            for(int j=0;j<networkSize;j++) {
+                                int idxOfNetwrok = (int)sumPvaluePerNetwork[j][0];
+                                if(heatmapNetworkList.indexOf(network200List.get(idxOfNetwrok))==-1)
+                                    heatmapNetworkList.add(network200List.get(idxOfNetwrok));
+                                if(pvalueMatrix[idxOfNetwrok][idxOfGO]<NOAStaticValues.LOG_PVALUE_CUTOFF)
+                                    heatmapPvalueMatrix[j][countPvalue] = NOAStaticValues.LOG_PVALUE_CUTOFF;
+                                else
+                                    heatmapPvalueMatrix[j][countPvalue] = pvalueMatrix[idxOfNetwrok][idxOfGO];
+                            }
+                            countPvalue++;
+                            if(countPvalue>=goSize)
+                                break;
+                        }
+                    }
+
+                    double[][] sortedHeatmapPvalueMatrix = new double[networkSize][goSize];
+                    double[][] sumPvaluePerGO1 = new double[goSize][2];
+                    double[][] sumPvaluePerNetwork1 = new double[networkSize][2];
+                    for(int i=0;i<goSize;i++) {
+                        sumPvaluePerGO1[i][0] = i;
+                        for(int j=0;j<networkSize;j++) {
+                            sumPvaluePerNetwork1[j][0] = j;
+                            sumPvaluePerGO1[i][1] += -2*heatmapPvalueMatrix[j][i];
+                            sumPvaluePerNetwork1[j][1] += -2*heatmapPvalueMatrix[j][i];
+                        }
+                    }
+
+                    sumPvaluePerGO1 = NOAUtil.dataSort(sumPvaluePerGO1, 1, 1);
+                    sumPvaluePerNetwork1 = NOAUtil.dataSort(sumPvaluePerNetwork1, 1);
+                    List heatmapGOList1 = new ArrayList();
+                    List heatmapNetworkList1 = new ArrayList();
+                    for(int i=0;i<goSize;i++) {
+                        heatmapGOList1.add(heatmapGOList.get((int)sumPvaluePerGO1[i][0]));
+                        for(int j=0;j<networkSize;j++) {
+                            sortedHeatmapPvalueMatrix[j][i] = heatmapPvalueMatrix[(int)sumPvaluePerNetwork1[j][0]][(int)sumPvaluePerGO1[i][0]];
+                        }
+                    }
+                    for(int j=0;j<networkSize;j++) {
+                        heatmapNetworkList1.add(heatmapNetworkList.get((int)sumPvaluePerNetwork1[j][0]));
+                    }
+
+                    pvalueMatrix = null;
+                    System.gc();
+                    //Mapping GO term to description
+                    Object[] go4Display = new Object[goSize];
+                    Map<String, String> goDescMap = NOAUtil.readMappingFile(this.getClass().getResource(NOAStaticValues.GO_DescFile), heatmapGOList1, 0);
+                    for(int i=0;i<goSize;i++){
+                        if(goDescMap.containsKey(heatmapGOList1.get(i).toString())) {
+                            go4Display[i] = goDescMap.get(heatmapGOList1.get(i).toString());
+                            if(go4Display[i].toString().length()>23)
+                                go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+                        } else {
+                            go4Display[i] = heatmapGOList1.get(i);
+                        }
+                    }
                     taskMonitor.setStatus("Generating heatmap ......");
-                    HeatChart chart = new HeatChart(pvalueMatrix);
-                    chart.setHighValueColour(Color.GREEN);
-                    chart.setLowValueColour(Color.RED);
-                    chart.setXValues(go200List.toArray());
-                    chart.setYValues(network200List.toArray());
+                    HeatChart chart = new HeatChart(sortedHeatmapPvalueMatrix);
+                    chart.setHighValueColour(Color.BLUE);
+                    chart.setLowValueColour(Color.YELLOW);
+                    chart.setXValues(go4Display);
+                    chart.setYValues(heatmapNetworkList.toArray());
                     tempHeatmapFileName = System.currentTimeMillis()+".png";
+
                     try {
                         chart.saveToFile(new File(NOA.NOATempDir+tempHeatmapFileName));
                     } catch (Exception e) {

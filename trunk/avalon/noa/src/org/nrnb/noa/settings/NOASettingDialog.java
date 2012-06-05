@@ -27,7 +27,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,8 +42,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -61,6 +61,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     private int currentNetworksize = 0;
     private final JFileChooser fc = new JFileChooser();
     private int initialTag = -1;
+    private int formatSign = -1;
 
 
     private List<String> batchdownloadDBList = new ArrayList<String>();
@@ -69,7 +70,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     public NOASettingDialog(java.awt.Frame parent, boolean model) {
         super(parent, model);
         String networkTitle = Cytoscape.getCurrentNetwork().getTitle();
-        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 03/31/2012";
+        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 05/17/2012";
         if(!networkTitle.trim().equals("0"))
             dialogTitle += " - "+networkTitle;
         this.setTitle(dialogTitle);
@@ -683,7 +684,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         sParEdgComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sParEdgComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-        sParStaComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Hyper-geometry", "Fisher exact test" }));
+        sParStaComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Hyper-geometry", "Fisher exact test", "z-score" }));
         sParStaComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sParStaComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
@@ -959,7 +960,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
 
         bRefButtonGroup.add(bInpRefWhoRadioButton);
         bInpRefWhoRadioButton.setSelected(true);
-        bInpRefWhoRadioButton.setText("Whole network");
+        bInpRefWhoRadioButton.setText("All networks");
         bInpRefWhoRadioButton.setMaximumSize(new java.awt.Dimension(140, 23));
         bInpRefWhoRadioButton.setMinimumSize(new java.awt.Dimension(140, 23));
         bInpRefWhoRadioButton.setPreferredSize(new java.awt.Dimension(140, 23));
@@ -987,348 +988,347 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
             }
         });
 
-        bInpTesPatTextField.setText("c:\\");
-            bInpTesPatTextField.setPreferredSize(new java.awt.Dimension(19, 19));
+        bInpTesPatTextField.setPreferredSize(new java.awt.Dimension(19, 19));
 
-            javax.swing.GroupLayout bInpPanelLayout = new javax.swing.GroupLayout(bInpPanel);
-            bInpPanel.setLayout(bInpPanelLayout);
-            bInpPanelLayout.setHorizontalGroup(
-                bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(bInpPanelLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bInpAlgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpTesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpRefLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(bInpPanelLayout.createSequentialGroup()
-                            .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(bInpAlgEdgRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
-                                .addComponent(bInpRefWhoRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
-                            .addGap(3, 3, 3)
-                            .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(bInpRefGenRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
-                                .addComponent(bInpAlgNodRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
-                            .addGap(6, 6, 6))
-                        .addGroup(bInpPanelLayout.createSequentialGroup()
-                            .addComponent(bInpTesPatTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                    .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bInpRefCliRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                        .addComponent(bInpTesUplButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap(51, Short.MAX_VALUE))
-            );
-            bInpPanelLayout.setVerticalGroup(
-                bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(bInpPanelLayout.createSequentialGroup()
-                    .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bInpAlgEdgRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpAlgNodRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpAlgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bInpTesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpTesUplButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpTesPatTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bInpRefWhoRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpRefGenRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpRefCliRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bInpRefLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-            );
+        javax.swing.GroupLayout bInpPanelLayout = new javax.swing.GroupLayout(bInpPanel);
+        bInpPanel.setLayout(bInpPanelLayout);
+        bInpPanelLayout.setHorizontalGroup(
+            bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bInpPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bInpAlgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpTesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpRefLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(bInpPanelLayout.createSequentialGroup()
+                        .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bInpAlgEdgRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(bInpRefWhoRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
+                        .addGap(3, 3, 3)
+                        .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bInpRefGenRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(bInpAlgNodRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
+                        .addGap(6, 6, 6))
+                    .addGroup(bInpPanelLayout.createSequentialGroup()
+                        .addComponent(bInpTesPatTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bInpRefCliRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                    .addComponent(bInpTesUplButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(51, Short.MAX_VALUE))
+        );
+        bInpPanelLayout.setVerticalGroup(
+            bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bInpPanelLayout.createSequentialGroup()
+                .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bInpAlgEdgRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpAlgNodRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpAlgLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bInpTesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpTesUplButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpTesPatTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bInpRefWhoRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpRefGenRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpRefCliRadioButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bInpRefLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
-            bParPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Set Parameters"));
+        bParPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Set Parameters"));
 
-            bParEdgAnnLabel.setText("Edge annotation");
-            bParEdgAnnLabel.setMaximumSize(new java.awt.Dimension(180, 14));
-            bParEdgAnnLabel.setMinimumSize(new java.awt.Dimension(180, 14));
-            bParEdgAnnLabel.setPreferredSize(new java.awt.Dimension(180, 14));
+        bParEdgAnnLabel.setText("Edge annotation");
+        bParEdgAnnLabel.setMaximumSize(new java.awt.Dimension(180, 14));
+        bParEdgAnnLabel.setMinimumSize(new java.awt.Dimension(180, 14));
+        bParEdgAnnLabel.setPreferredSize(new java.awt.Dimension(180, 14));
 
-            bParStaLabel.setText("Statistical method");
-            bParStaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-            bParStaLabel.setMaximumSize(new java.awt.Dimension(148, 14));
-            bParStaLabel.setMinimumSize(new java.awt.Dimension(148, 14));
-            bParStaLabel.setPreferredSize(new java.awt.Dimension(148, 14));
+        bParStaLabel.setText("Statistical method");
+        bParStaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        bParStaLabel.setMaximumSize(new java.awt.Dimension(148, 14));
+        bParStaLabel.setMinimumSize(new java.awt.Dimension(148, 14));
+        bParStaLabel.setPreferredSize(new java.awt.Dimension(148, 14));
 
-            bParCorLabel.setText("Correction method");
-            bParCorLabel.setMaximumSize(new java.awt.Dimension(180, 14));
-            bParCorLabel.setMinimumSize(new java.awt.Dimension(180, 14));
-            bParCorLabel.setPreferredSize(new java.awt.Dimension(180, 14));
+        bParCorLabel.setText("Correction method");
+        bParCorLabel.setMaximumSize(new java.awt.Dimension(180, 14));
+        bParCorLabel.setMinimumSize(new java.awt.Dimension(180, 14));
+        bParCorLabel.setPreferredSize(new java.awt.Dimension(180, 14));
 
-            bParPvaLabel.setText("P-value threshold");
-            bParPvaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-            bParPvaLabel.setMaximumSize(new java.awt.Dimension(148, 14));
-            bParPvaLabel.setMinimumSize(new java.awt.Dimension(148, 14));
-            bParPvaLabel.setPreferredSize(new java.awt.Dimension(148, 14));
+        bParPvaLabel.setText("P-value threshold");
+        bParPvaLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        bParPvaLabel.setMaximumSize(new java.awt.Dimension(148, 14));
+        bParPvaLabel.setMinimumSize(new java.awt.Dimension(148, 14));
+        bParPvaLabel.setPreferredSize(new java.awt.Dimension(148, 14));
 
-            bParPvaTextField.setColumns(5);
-            bParPvaTextField.setText("0.05");
-            bParPvaTextField.setMinimumSize(new java.awt.Dimension(90, 20));
-            bParPvaTextField.setPreferredSize(new java.awt.Dimension(108, 20));
-            bParPvaTextField.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    bParPvaTextFieldActionPerformed(evt);
-                }
-            });
+        bParPvaTextField.setColumns(5);
+        bParPvaTextField.setText("0.05");
+        bParPvaTextField.setMinimumSize(new java.awt.Dimension(90, 20));
+        bParPvaTextField.setPreferredSize(new java.awt.Dimension(108, 20));
+        bParPvaTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bParPvaTextFieldActionPerformed(evt);
+            }
+        });
 
-            bParEdgComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Intersection", "Union" }));
-            bParEdgComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bParEdgComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bParEdgComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Intersection", "Union" }));
+        bParEdgComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bParEdgComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-            bParStaComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Hyper-geometry", "Fisher exact test" }));
-            bParStaComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bParStaComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bParStaComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Hyper-geometry", "Fisher exact test", "z-score" }));
+        bParStaComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bParStaComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-            bParCorComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "Bonferroni", "Benjamini & Hochberg q value" }));
-            bParCorComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bParCorComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bParCorComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "Bonferroni", "Benjamini & Hochberg q value" }));
+        bParCorComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bParCorComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-            javax.swing.GroupLayout bParPanelLayout = new javax.swing.GroupLayout(bParPanel);
-            bParPanel.setLayout(bParPanelLayout);
-            bParPanelLayout.setHorizontalGroup(
-                bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(bParPanelLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bParCorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParEdgAnnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bParEdgComboBox, 0, 120, Short.MAX_VALUE)
-                        .addComponent(bParCorComboBox, 0, 120, Short.MAX_VALUE))
-                    .addGap(44, 44, 44)
-                    .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bParStaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bParStaComboBox, 0, 120, Short.MAX_VALUE)
-                        .addComponent(bParPvaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
-                    .addContainerGap())
-            );
-            bParPanelLayout.setVerticalGroup(
-                bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(bParPanelLayout.createSequentialGroup()
-                    .addGap(13, 13, 13)
-                    .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bParEdgAnnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParEdgComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParStaComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParStaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bParCorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParCorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParPvaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-            );
+        javax.swing.GroupLayout bParPanelLayout = new javax.swing.GroupLayout(bParPanel);
+        bParPanel.setLayout(bParPanelLayout);
+        bParPanelLayout.setHorizontalGroup(
+            bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bParPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bParCorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParEdgAnnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bParEdgComboBox, 0, 120, Short.MAX_VALUE)
+                    .addComponent(bParCorComboBox, 0, 120, Short.MAX_VALUE))
+                .addGap(44, 44, 44)
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bParStaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bParStaComboBox, 0, 120, Short.MAX_VALUE)
+                    .addComponent(bParPvaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        bParPanelLayout.setVerticalGroup(
+            bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bParPanelLayout.createSequentialGroup()
+                .addGap(13, 13, 13)
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bParEdgAnnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParEdgComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParStaComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParStaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bParCorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParCorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParPvaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
-            bAnnPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Retrieve GO Annotations"));
-            bAnnPanel.setPreferredSize(new java.awt.Dimension(660, 140));
+        bAnnPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Retrieve GO Annotations"));
+        bAnnPanel.setPreferredSize(new java.awt.Dimension(660, 140));
 
-            bAnnMesLabel.setForeground(java.awt.Color.red);
-            bAnnMesLabel.setText("You need to first download necessary databases for selected species!");
+        bAnnMesLabel.setForeground(java.awt.Color.red);
+        bAnnMesLabel.setText("You need to first download necessary databases for selected species!");
 
-            bAnnMesButton.setForeground(java.awt.Color.red);
-            bAnnMesButton.setText("Download");
-            bAnnMesButton.setMaximumSize(new java.awt.Dimension(32767, 32767));
-            bAnnMesButton.setMinimumSize(new java.awt.Dimension(90, 18));
-            bAnnMesButton.setPreferredSize(new java.awt.Dimension(108, 23));
-            bAnnMesButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    bAnnMesButtonActionPerformed(evt);
-                }
-            });
+        bAnnMesButton.setForeground(java.awt.Color.red);
+        bAnnMesButton.setText("Download");
+        bAnnMesButton.setMaximumSize(new java.awt.Dimension(32767, 32767));
+        bAnnMesButton.setMinimumSize(new java.awt.Dimension(90, 18));
+        bAnnMesButton.setPreferredSize(new java.awt.Dimension(108, 23));
+        bAnnMesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bAnnMesButtonActionPerformed(evt);
+            }
+        });
 
-            bAnnSpeLabel.setText("Species");
-            bAnnSpeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-            bAnnSpeLabel.setMaximumSize(new java.awt.Dimension(180, 14));
-            bAnnSpeLabel.setMinimumSize(new java.awt.Dimension(180, 14));
-            bAnnSpeLabel.setPreferredSize(new java.awt.Dimension(180, 14));
+        bAnnSpeLabel.setText("Species");
+        bAnnSpeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        bAnnSpeLabel.setMaximumSize(new java.awt.Dimension(180, 14));
+        bAnnSpeLabel.setMinimumSize(new java.awt.Dimension(180, 14));
+        bAnnSpeLabel.setPreferredSize(new java.awt.Dimension(180, 14));
 
-            bAnnSpeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Yeast" }));
-            bAnnSpeComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bAnnSpeComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
-            bAnnSpeComboBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    bAnnSpeComboBoxActionPerformed(evt);
-                }
-            });
+        bAnnSpeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Yeast" }));
+        bAnnSpeComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bAnnSpeComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bAnnSpeComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bAnnSpeComboBoxActionPerformed(evt);
+            }
+        });
 
-            bAnnIdeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ID" }));
-            bAnnIdeComboBox.setEnabled(false);
-            bAnnIdeComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bAnnIdeComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
-            bAnnIdeComboBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    bAnnIdeComboBoxActionPerformed(evt);
-                }
-            });
+        bAnnIdeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ID" }));
+        bAnnIdeComboBox.setEnabled(false);
+        bAnnIdeComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bAnnIdeComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bAnnIdeComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bAnnIdeComboBoxActionPerformed(evt);
+            }
+        });
 
-            bAnnTypComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ensembl Yeast" }));
-            bAnnTypComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bAnnTypComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bAnnTypComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ensembl Yeast" }));
+        bAnnTypComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bAnnTypComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-            bAnnIdeLabel.setText("Identifier attribute");
-            bAnnIdeLabel.setEnabled(false);
-            bAnnIdeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-            bAnnIdeLabel.setMaximumSize(new java.awt.Dimension(180, 14));
-            bAnnIdeLabel.setMinimumSize(new java.awt.Dimension(180, 14));
-            bAnnIdeLabel.setPreferredSize(new java.awt.Dimension(180, 14));
+        bAnnIdeLabel.setText("Identifier attribute");
+        bAnnIdeLabel.setEnabled(false);
+        bAnnIdeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        bAnnIdeLabel.setMaximumSize(new java.awt.Dimension(180, 14));
+        bAnnIdeLabel.setMinimumSize(new java.awt.Dimension(180, 14));
+        bAnnIdeLabel.setPreferredSize(new java.awt.Dimension(180, 14));
 
-            bAnnTypLabel.setText("Type of identifier");
-            bAnnTypLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-            bAnnTypLabel.setMaximumSize(new java.awt.Dimension(148, 14));
-            bAnnTypLabel.setMinimumSize(new java.awt.Dimension(148, 14));
-            bAnnTypLabel.setPreferredSize(new java.awt.Dimension(148, 14));
+        bAnnTypLabel.setText("Type of identifier");
+        bAnnTypLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        bAnnTypLabel.setMaximumSize(new java.awt.Dimension(148, 14));
+        bAnnTypLabel.setMinimumSize(new java.awt.Dimension(148, 14));
+        bAnnTypLabel.setPreferredSize(new java.awt.Dimension(148, 14));
 
-            bAnnGOtLabel.setText("Type of GO");
-            bAnnGOtLabel.setMaximumSize(new java.awt.Dimension(130, 14));
-            bAnnGOtLabel.setMinimumSize(new java.awt.Dimension(130, 14));
-            bAnnGOtLabel.setPreferredSize(new java.awt.Dimension(130, 14));
+        bAnnGOtLabel.setText("Type of GO");
+        bAnnGOtLabel.setMaximumSize(new java.awt.Dimension(130, 14));
+        bAnnGOtLabel.setMinimumSize(new java.awt.Dimension(130, 14));
+        bAnnGOtLabel.setPreferredSize(new java.awt.Dimension(130, 14));
 
-            bAnnGOtComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "SlimMosaic", "SlimPIR", "SlimGeneric", "Full" }));
-            bAnnGOtComboBox.setSelectedIndex(3);
-            bAnnGOtComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
-            bAnnGOtComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
+        bAnnGOtComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "SlimMosaic", "SlimPIR", "SlimGeneric", "Full" }));
+        bAnnGOtComboBox.setSelectedIndex(3);
+        bAnnGOtComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
+        bAnnGOtComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
-            javax.swing.GroupLayout bAnnPanelLayout = new javax.swing.GroupLayout(bAnnPanel);
-            bAnnPanel.setLayout(bAnnPanelLayout);
-            bAnnPanelLayout.setHorizontalGroup(
-                bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(bAnnPanelLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bAnnPanelLayout.createSequentialGroup()
-                            .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(bAnnIdeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(bAnnSpeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(bAnnIdeComboBox, 0, 120, Short.MAX_VALUE)
-                                .addComponent(bAnnSpeComboBox, 0, 120, Short.MAX_VALUE))
-                            .addGap(44, 44, 44)
-                            .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(bAnnGOtLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(bAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addComponent(bAnnMesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bAnnMesButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                        .addComponent(bAnnGOtComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, 120, Short.MAX_VALUE)
-                        .addComponent(bAnnTypComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, 120, Short.MAX_VALUE))
-                    .addContainerGap())
-            );
-            bAnnPanelLayout.setVerticalGroup(
-                bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(bAnnPanelLayout.createSequentialGroup()
-                    .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bAnnMesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnMesButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bAnnSpeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnSpeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnGOtLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnGOtComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bAnnIdeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bAnnIdeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            );
+        javax.swing.GroupLayout bAnnPanelLayout = new javax.swing.GroupLayout(bAnnPanel);
+        bAnnPanel.setLayout(bAnnPanelLayout);
+        bAnnPanelLayout.setHorizontalGroup(
+            bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bAnnPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bAnnPanelLayout.createSequentialGroup()
+                        .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(bAnnIdeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(bAnnSpeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bAnnIdeComboBox, 0, 120, Short.MAX_VALUE)
+                            .addComponent(bAnnSpeComboBox, 0, 120, Short.MAX_VALUE))
+                        .addGap(44, 44, 44)
+                        .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(bAnnGOtLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(bAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(bAnnMesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bAnnMesButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                    .addComponent(bAnnGOtComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, 120, Short.MAX_VALUE)
+                    .addComponent(bAnnTypComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, 120, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        bAnnPanelLayout.setVerticalGroup(
+            bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bAnnPanelLayout.createSequentialGroup()
+                .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bAnnMesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnMesButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bAnnSpeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnSpeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnGOtLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnGOtComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(bAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bAnnIdeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bAnnIdeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
-            bSubmitButton.setText("Run");
-            bSubmitButton.setMaximumSize(new java.awt.Dimension(70, 23));
-            bSubmitButton.setMinimumSize(new java.awt.Dimension(70, 23));
-            bSubmitButton.setPreferredSize(new java.awt.Dimension(70, 23));
-            bSubmitButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    bSubmitButtonActionPerformed(evt);
-                }
-            });
+        bSubmitButton.setText("Run");
+        bSubmitButton.setMaximumSize(new java.awt.Dimension(70, 23));
+        bSubmitButton.setMinimumSize(new java.awt.Dimension(70, 23));
+        bSubmitButton.setPreferredSize(new java.awt.Dimension(70, 23));
+        bSubmitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bSubmitButtonActionPerformed(evt);
+            }
+        });
 
-            bCancelButton.setText("Cancel");
-            bCancelButton.setMaximumSize(new java.awt.Dimension(70, 23));
-            bCancelButton.setMinimumSize(new java.awt.Dimension(70, 23));
-            bCancelButton.setPreferredSize(new java.awt.Dimension(70, 23));
-            bCancelButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    bCancelButtonActionPerformed(evt);
-                }
-            });
+        bCancelButton.setText("Cancel");
+        bCancelButton.setMaximumSize(new java.awt.Dimension(70, 23));
+        bCancelButton.setMinimumSize(new java.awt.Dimension(70, 23));
+        bCancelButton.setPreferredSize(new java.awt.Dimension(70, 23));
+        bCancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bCancelButtonActionPerformed(evt);
+            }
+        });
 
-            javax.swing.GroupLayout bButtonPanelLayout = new javax.swing.GroupLayout(bButtonPanel);
-            bButtonPanel.setLayout(bButtonPanelLayout);
-            bButtonPanelLayout.setHorizontalGroup(
-                bButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bButtonPanelLayout.createSequentialGroup()
-                    .addGap(490, 490, 490)
-                    .addComponent(bSubmitButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(18, 18, 18)
-                    .addComponent(bCancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(24, 24, 24))
-            );
-            bButtonPanelLayout.setVerticalGroup(
-                bButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bButtonPanelLayout.createSequentialGroup()
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(bButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(bCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(bSubmitButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-            );
+        javax.swing.GroupLayout bButtonPanelLayout = new javax.swing.GroupLayout(bButtonPanel);
+        bButtonPanel.setLayout(bButtonPanelLayout);
+        bButtonPanelLayout.setHorizontalGroup(
+            bButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bButtonPanelLayout.createSequentialGroup()
+                .addGap(490, 490, 490)
+                .addComponent(bSubmitButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(bCancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(24, 24, 24))
+        );
+        bButtonPanelLayout.setVerticalGroup(
+            bButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bButtonPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(bButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(bCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bSubmitButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
-            javax.swing.GroupLayout BatchPanelLayout = new javax.swing.GroupLayout(BatchPanel);
-            BatchPanel.setLayout(BatchPanelLayout);
-            BatchPanelLayout.setHorizontalGroup(
-                BatchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(BatchPanelLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(BatchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(bInpPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(bParPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(bAnnPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 672, Short.MAX_VALUE)
-                        .addComponent(bButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGap(14, 14, 14))
-            );
-            BatchPanelLayout.setVerticalGroup(
-                BatchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(BatchPanelLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(bInpPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(bAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(bParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(bButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(12, Short.MAX_VALUE))
-            );
+        javax.swing.GroupLayout BatchPanelLayout = new javax.swing.GroupLayout(BatchPanel);
+        BatchPanel.setLayout(BatchPanelLayout);
+        BatchPanelLayout.setHorizontalGroup(
+            BatchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(BatchPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(BatchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bInpPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(bParPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(bAnnPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 672, Short.MAX_VALUE)
+                    .addComponent(bButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(14, 14, 14))
+        );
+        BatchPanelLayout.setVerticalGroup(
+            BatchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(BatchPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(bInpPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(bAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(bParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(bButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
+        );
 
-            NOAMainTabbedPane.addTab("Batch", BatchPanel);
+        NOAMainTabbedPane.addTab("Batch", BatchPanel);
 
-            javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-            getContentPane().setLayout(layout);
-            layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(NOAMainTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 701, Short.MAX_VALUE)
-            );
-            layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(NOAMainTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-            );
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(NOAMainTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 701, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(NOAMainTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+        );
 
-            NOAMainTabbedPane.getAccessibleContext().setAccessibleName("Single");
+        NOAMainTabbedPane.getAccessibleContext().setAccessibleName("Single");
 
-            pack();
-        }// </editor-fold>//GEN-END:initComponents
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
 
     private void bInpAlgNodRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bInpAlgNodRadioButtonActionPerformed
         // TODO add your handling code here:
@@ -1451,7 +1451,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                 bParEdgComboBox.getSelectedItem(), bParStaComboBox.getSelectedItem(),
                 bParCorComboBox.getSelectedItem(), bParPvaTextField.getText(),
                 localDerbyDB, localGOslimDB, bAnnTypComboBox.getSelectedItem(),
-                idMappingTypeValues.get(findMatchType("Ensembl")));
+                idMappingTypeValues.get(findMatchType("Ensembl")), formatSign);
         // Configure JTask Dialog Pop-Up Box
         final JTaskConfig jTaskConfig = new JTaskConfig();
         jTaskConfig.setOwner(Cytoscape.getDesktop());
@@ -1688,7 +1688,36 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            bInpTesPatTextField.setText(file.getAbsolutePath());
+            String inputFilePath = file.getAbsolutePath();
+            bInpTesPatTextField.setText(inputFilePath);
+            //1st step - check file format and get the list of all nodes
+            try {
+                BufferedReader in = new BufferedReader(new FileReader(inputFilePath));
+                String inputLine = in.readLine();
+                inputLine = in.readLine();
+                while((inputLine.indexOf(">")!=-1)||(inputLine.trim().equals("")||inputLine.equals(null))) {
+                    inputLine = in.readLine();
+                }
+                String[] temp = inputLine.trim().split("\t");
+                if(temp.length == 1) {
+                    formatSign = NOAStaticValues.SET_FORMAT;
+                } else if(temp.length == 2) {
+                    formatSign = NOAStaticValues.NETWORK_FORMAT;
+                } else {
+                    formatSign = NOAStaticValues.WRONG_FORMAT;
+                }
+            } catch (Exception e) {
+                formatSign = NOAStaticValues.WRONG_FORMAT;
+                e.printStackTrace();
+            }
+            if(formatSign == NOAStaticValues.SET_FORMAT) {
+                bInpAlgNodRadioButton.setSelected(true);
+                bInpAlgEdgRadioButton.setEnabled(false);
+            } else {
+                bInpAlgEdgRadioButton.setEnabled(true);
+                bInpAlgEdgRadioButton.setSelected(true);
+            }
+            checkGroupButtonSelection();
         }
     }//GEN-LAST:event_bInpTesUplButtonActionPerformed
 
