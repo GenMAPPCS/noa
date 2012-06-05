@@ -27,6 +27,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -85,19 +86,20 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         this.setTitle(NOA.pluginName+" output for Batch Mode");
         if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
             if(this.formatSign == NOAStaticValues.NETWORK_FORMAT) {
-                tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Sample", "Population", "Description", "Associated genes"};
+                tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Test", "Reference", "Description", "Associated genes"};
                 tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated networks"};
             } else {
-                tableTitleForResult = new String [] {"Set ID", "GO ID", "Type", "P-value", "Sample", "Population", "Description", "Associated genes"};
+                tableTitleForResult = new String [] {"Set ID", "GO ID", "Type", "P-value", "Test", "Reference", "Description", "Associated genes"};
                 tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated sets"};
             }
         } else {
-            tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Sample", "Population", "Description", "Associated edges"};
+            tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Test", "Reference", "Description", "Associated edges"};
             tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated networks"};
         }
         Object[][] goPvalueArray = new String[recordCount][8];
         cellsForTopResult = new Object[this.topResultMap.size()][8];
         cellsForOverlap = new Object[resultMap.size()][4];
+        HashMap<String, String> GODescMap = new HashMap<String, String>();
         int i = 0;
         int j = 0;
         int n = 0;
@@ -112,6 +114,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
                 String[] retail = inputLine.split("\t");
                 if(retail.length>=3) {
                     if(this.resultMap.containsKey(retail[0].trim())) {
+                        GODescMap.put(retail[0].trim(), inputLine);
                         cellsForOverlap[j][0] = retail[0].trim();
                         cellsForOverlap[j][3] = "";
                         ArrayList<String> resultWithNetworkID = this.resultMap.get(retail[0].trim());
@@ -160,35 +163,63 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 //                        }
                         j++;
                     }
-                    if(this.topResultMap.containsKey(retail[0].trim())) {
-                        String eachNet = this.topResultMap.get(retail[0].trim());                        
-                        cellsForTopResult[n][1] = retail[0];
-                        String[] temp = eachNet.trim().split("\t");
-                        cellsForTopResult[n][0] = temp[3].trim();
-                        DecimalFormat df1 = new DecimalFormat("#.####");
-                        DecimalFormat df2 = new DecimalFormat("#.####E0");
-                        double pvalue = new Double(temp[0]).doubleValue();
-                        if(pvalue>0.0001)
-                            cellsForTopResult[n][3] = df1.format(pvalue);
-                        else
-                            cellsForTopResult[n][3] = df2.format(pvalue);
-                        cellsForTopResult[n][4] = temp[1];
-                        cellsForTopResult[n][5] = temp[2];
-                        cellsForTopResult[n][6] = retail[1];
-
-                        cellsForTopResult[n][7] = temp[4].substring(1, temp[4].length()-1).trim();
-                        if(retail[2].equals("biological_process")) {
-                            cellsForTopResult[n][2] = "BP";
-                        } else if (retail[2].equals("cellular_component")) {
-                            cellsForTopResult[n][2] = "CC";
-                        } else {
-                            cellsForTopResult[n][2] = "MF";
-                        }
-                        n++;
-                    }
+//                    if(this.topResultMap.containsKey(retail[0].trim())) {
+//                        String eachNet = this.topResultMap.get(retail[0].trim());
+//                        cellsForTopResult[n][1] = retail[0];
+//                        String[] temp = eachNet.trim().split("\t");
+//                        cellsForTopResult[n][0] = temp[3].trim();
+//                        DecimalFormat df1 = new DecimalFormat("#.####");
+//                        DecimalFormat df2 = new DecimalFormat("#.####E0");
+//                        double pvalue = new Double(temp[0]).doubleValue();
+//                        if(pvalue>0.0001)
+//                            cellsForTopResult[n][3] = df1.format(pvalue);
+//                        else
+//                            cellsForTopResult[n][3] = df2.format(pvalue);
+//                        cellsForTopResult[n][4] = temp[1];
+//                        cellsForTopResult[n][5] = temp[2];
+//                        cellsForTopResult[n][6] = retail[1];
+//
+//                        cellsForTopResult[n][7] = temp[4].substring(1, temp[4].length()-1).trim();
+//                        if(retail[2].equals("biological_process")) {
+//                            cellsForTopResult[n][2] = "BP";
+//                        } else if (retail[2].equals("cellular_component")) {
+//                            cellsForTopResult[n][2] = "CC";
+//                        } else {
+//                            cellsForTopResult[n][2] = "MF";
+//                        }
+//                        n++;
+//                    }
                 }
             }
             in.close();
+            Set<String> topResultKey = topResultMap.keySet();
+            for(String key:topResultKey){
+                cellsForTopResult[n][1] = key.substring(0, key.indexOf("\t"));
+                String[] retail = GODescMap.get(cellsForTopResult[n][1]).trim().split("\t");
+                String eachNet = this.topResultMap.get(key);                
+                String[] temp = eachNet.trim().split("\t");
+                cellsForTopResult[n][0] = temp[3].trim();
+                DecimalFormat df1 = new DecimalFormat("#.####");
+                DecimalFormat df2 = new DecimalFormat("#.####E0");
+                double pvalue = new Double(temp[0]).doubleValue();
+                if(pvalue>0.0001)
+                    cellsForTopResult[n][3] = df1.format(pvalue);
+                else
+                    cellsForTopResult[n][3] = df2.format(pvalue);
+                cellsForTopResult[n][4] = temp[1];
+                cellsForTopResult[n][5] = temp[2];
+                cellsForTopResult[n][6] = retail[1];
+
+                cellsForTopResult[n][7] = temp[4].substring(1, temp[4].length()-1).trim();
+                if(retail[2].equals("biological_process")) {
+                    cellsForTopResult[n][2] = "BP";
+                } else if (retail[2].equals("cellular_component")) {
+                    cellsForTopResult[n][2] = "CC";
+                } else {
+                    cellsForTopResult[n][2] = "MF";
+                }
+                n++;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -302,7 +333,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
             }
         });
 
-        save2FileButton.setText("Save to ...");
+        save2FileButton.setText("Save");
         save2FileButton.setMaximumSize(new java.awt.Dimension(95, 23));
         save2FileButton.setMinimumSize(new java.awt.Dimension(95, 23));
         save2FileButton.setPreferredSize(new java.awt.Dimension(95, 23));
@@ -357,15 +388,15 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(heatmapButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(heatmapButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resultSwitchComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 245, Short.MAX_VALUE)
-                .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(resultSwitchComboBox, 0, 95, Short.MAX_VALUE)
+                .addGap(245, 245, 245)
+                .addComponent(save2FileButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
                 .addGap(31, 31, 31)
-                .addComponent(goMosaicButton)
+                .addComponent(goMosaicButton, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                 .addGap(31, 31, 31)
-                .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -418,7 +449,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         resultTable.getColumnModel().getColumn(3).setPreferredWidth(50);
         resultTable.getColumnModel().getColumn(3).setMaxWidth(50);
 
-        resultTabbedPane.addTab("Normal results", jScrollPane1);
+        resultTabbedPane.addTab("Results", jScrollPane1);
 
         overlapTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -446,7 +477,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         });
         jScrollPane2.setViewportView(overlapTable);
 
-        resultTabbedPane.addTab("Overlap", jScrollPane2);
+        resultTabbedPane.addTab("Overlap results", jScrollPane2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -612,14 +643,26 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 
     public void mouseClicked(MouseEvent e) {
         if(e.getClickCount() == 2){
+            int i = resultTabbedPane.getSelectedIndex();
 			try{
 				if(e.getSource().getClass() == Class.forName("javax.swing.JTable")) {
-					if(resultTable.getSelectedColumn()==0) {
-						//just for search by seq, click the detail button to see the whole result of blast.
-						Object geneName = outputModelForResult.getValueAt(resultTable.getSelectedRow(),0);
-						URI uri = new java.net.URI("http://amigo.geneontology.org/cgi-bin/amigo/term_details?term="+geneName);
-                        Desktop.getDesktop().browse(uri);
-					}
+                    if(i==0) {
+                        if(resultTable.getSelectedColumn()==1) {
+                            int rowNum = resultTable.convertRowIndexToModel(resultTable.getSelectedRow());
+                            //just for search by seq, click the detail button to see the whole result of blast.
+                            Object geneName = outputModelForResult.getValueAt(rowNum,1);
+                            URI uri = new java.net.URI("http://amigo.geneontology.org/cgi-bin/amigo/term_details?term="+geneName);
+                            Desktop.getDesktop().browse(uri);
+                        }
+                    } else {
+                        if(overlapTable.getSelectedColumn()==0) {
+                            int rowNum = overlapTable.convertRowIndexToModel(overlapTable.getSelectedRow());
+                            //just for search by seq, click the detail button to see the whole result of blast.
+                            Object geneName = outputModelForOverlap.getValueAt(rowNum,0);
+                            URI uri = new java.net.URI("http://amigo.geneontology.org/cgi-bin/amigo/term_details?term="+geneName);
+                            Desktop.getDesktop().browse(uri);
+                        }
+                    }
 				}
 			} catch(Exception ex){
 				ex.printStackTrace();

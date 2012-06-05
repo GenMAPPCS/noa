@@ -101,6 +101,8 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
                                 pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                            } else if(statMethod.equals(NOAStaticValues.STAT_ZScore)) {
+                                pvalue = StatMethod.calZScorePValue(valueA, valueB, valueC, valueD);
                             } else {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
@@ -133,6 +135,8 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
                                 pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                            } else if(statMethod.equals(NOAStaticValues.STAT_ZScore)) {
+                                pvalue = StatMethod.calZScorePValue(valueA, valueB, valueC, valueD);
                             } else {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
@@ -161,8 +165,14 @@ class NOASingleEnrichmentTask implements Task {
                 potentialGOList.addAll(NOAUtil.retrieveEdgeAttribute(NOAStaticValues.MF_ATTNAME, selectedEdgesSet, goNodeMap, this.edgeAnnotation));
 
                 Set<CyNode> selectedNodesSet = Cytoscape.getCurrentNetwork().getSelectedNodes();                
-                if(!isSubnet)
+                if(!isSubnet) {
                     selectedNodesSet = new HashSet<CyNode>(Cytoscape.getCurrentNetwork().nodesList());
+                } else {
+                    for(CyEdge cedge:selectedEdgesSet){
+                        selectedNodesSet.add((CyNode)cedge.getSource());
+                        selectedNodesSet.add((CyNode)cedge.getTarget());
+                    }
+                }
                 NOAUtil.retrieveNodeAttribute(NOAStaticValues.BP_ATTNAME, selectedNodesSet, goNode4EdgeAlgMap);
                 NOAUtil.retrieveNodeAttribute(NOAStaticValues.CC_ATTNAME, selectedNodesSet, goNode4EdgeAlgMap);
                 NOAUtil.retrieveNodeAttribute(NOAStaticValues.MF_ATTNAME, selectedNodesSet, goNode4EdgeAlgMap);
@@ -187,6 +197,8 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
                                 pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                            } else if(statMethod.equals(NOAStaticValues.STAT_ZScore)) {
+                                pvalue = StatMethod.calZScorePValue(valueA, valueB, valueC, valueD);
                             } else {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
@@ -211,11 +223,14 @@ class NOASingleEnrichmentTask implements Task {
 //                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.CC_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
 //                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.MF_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
                     NOAUtil.retrieveAllEdgeCountMap(goNode4EdgeAlgMap, goNodeCountRefMap, potentialGOList, this.edgeAnnotation, numOfNode);
+                    System.out.println("potentialGOList size "+potentialGOList.size());
+                    System.out.println("nodeGO size "+goNode4EdgeAlgMap.size());
                     for(Object eachGO : potentialGOList) {
                         if(!eachGO.equals("unassigned")) {
                             taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
                             int valueA = goNodeMap.get(eachGO).size();
                             int valueB = selectedEdgesSet.size();
+                            System.out.print("Calculating p-value for "+eachGO+" ...... ");
                             int valueC = new Integer(goNodeCountRefMap.get(eachGO).toString()).intValue();
                             int valueD = totalEdgesInClique;
                             double pvalue = 0;
@@ -223,9 +238,12 @@ class NOASingleEnrichmentTask implements Task {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             } else if(statMethod.equals(NOAStaticValues.STAT_Fisher)) {
                                 pvalue = StatMethod.calFisherTestPValue(valueA, valueB, valueC, valueD);
+                            } else if(statMethod.equals(NOAStaticValues.STAT_ZScore)) {
+                                pvalue = StatMethod.calZScorePValue(valueA, valueB, valueC, valueD);
                             } else {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
+                            System.out.println(pvalue);
                             if(pvalue<=this.pvalue)
                                 resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
                         }

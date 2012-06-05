@@ -65,9 +65,9 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
     private void initValues() {
         this.setTitle(NOA.pluginName+" output for Single Mode");
         if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
-            tableTitle = new String [] {"GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated genes"};
+            tableTitle = new String [] {"GO ID", "Type", "P-value", "Test", "Reference", "Desciption", "Associated genes"};
         } else {
-            tableTitle = new String [] {"GO ID", "Type", "P-value", "Sample", "Population", "Desciption", "Associated edges"};
+            tableTitle = new String [] {"GO ID", "Type", "P-value", "Test", "Reference", "Desciption", "Associated edges"};
         }
         Object[][] goPvalueArray = new String[resultMap.size()][7];
         int i = 0;
@@ -202,7 +202,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        save2FileButton.setText("Save to ...");
+        save2FileButton.setText("Save");
         save2FileButton.setMaximumSize(new java.awt.Dimension(95, 23));
         save2FileButton.setMinimumSize(new java.awt.Dimension(95, 23));
         save2FileButton.setPreferredSize(new java.awt.Dimension(95, 23));
@@ -234,12 +234,12 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(451, Short.MAX_VALUE)
-                .addComponent(save2FileButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(451, 451, 451)
+                .addComponent(save2FileButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
                 .addGap(31, 31, 31)
-                .addComponent(goMosaicButton)
+                .addComponent(goMosaicButton, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                 .addGap(31, 31, 31)
-                .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -353,7 +353,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         if(e.getClickCount() == 1){
 			try{
 				if(e.getSource().getClass() == Class.forName("javax.swing.JTable")){
-					selectedRow = resultTable.getSelectedRow();
+                    selectedRow = resultTable.convertRowIndexToModel(resultTable.getSelectedRow());
                     String idList = outputModel.getValueAt(selectedRow, 6).toString();
                     if(this.algType.equals(NOAStaticValues.Algorithm_NODE)) {
                         Cytoscape.getCurrentNetwork().unselectAllNodes();
@@ -381,8 +381,9 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
 			try{
 				if(e.getSource().getClass() == Class.forName("javax.swing.JTable")) {
 					if(resultTable.getSelectedColumn()==0) {
+                        int rowNum = resultTable.convertRowIndexToModel(resultTable.getSelectedRow());
 						//just for search by seq, click the detail button to see the whole result of blast.
-						Object geneName = outputModel.getValueAt(resultTable.getSelectedRow(),0);
+						Object geneName = outputModel.getValueAt(rowNum,0);
 						URI uri = new java.net.URI("http://amigo.geneontology.org/cgi-bin/amigo/term_details?term="+geneName);
                         Desktop.getDesktop().browse(uri);
 					}

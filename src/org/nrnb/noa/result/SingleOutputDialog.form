@@ -43,13 +43,13 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="451" max="32767" attributes="0"/>
-                  <Component id="save2FileButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="451" max="-2" attributes="0"/>
+                  <Component id="save2FileButton" pref="95" max="32767" attributes="0"/>
                   <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-                  <Component id="goMosaicButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="goMosaicButton" pref="93" max="32767" attributes="0"/>
                   <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
-                  <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="cancelButton" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -70,7 +70,7 @@
       <SubComponents>
         <Component class="javax.swing.JButton" name="save2FileButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Save to ..."/>
+            <Property name="text" type="java.lang.String" value="Save"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[95, 23]"/>
             </Property>

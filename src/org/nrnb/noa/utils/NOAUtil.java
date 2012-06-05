@@ -274,7 +274,7 @@ public class NOAUtil {
      * @param filename
      * @return
      */
-    public static Map<String, String> readMappingFile(URL filename, Set<Object> firstAttributeList, int index) {
+    public static Map<String, String> readMappingFile(URL filename, List<Object> firstAttributeList, int index) {
         Map<String, String> ret = new HashMap<String, String>();
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
@@ -282,7 +282,7 @@ public class NOAUtil {
             while ((inputLine = in.readLine()) != null) {
                 String[] retail = inputLine.split("\t");
                 if(retail.length>=2) {
-                    if(firstAttributeList.contains(retail[index].trim()))
+                    if(firstAttributeList.indexOf(retail[index].trim())!=-1)
                         ret.put(retail[0].trim(), retail[1].trim());
                 }
             }
@@ -327,6 +327,116 @@ public class NOAUtil {
         }
         String[] children = dir.list();
         return Arrays.asList(children);
+    }
+    
+	/**
+	 * sorting an array by one of the columns, and then return a decreasing array.
+	 * @param a - unsorted double array
+	 * @param b - the column number of array
+	 * @param orderTag - decreasing tag, the value is not important
+	 * @return sorted array
+	 */
+	public static double[][] dataSort(double[][] a, int b, int orderTag){
+		double[][] dataArray = a;
+		int array_size = a.length;
+		if (a[0].length <= b) {
+			return null;
+		}
+		//Build-Min-Heap
+		for(int i = new Double(Math.floor((array_size-1)/2)).intValue(); i>=0; i--){
+			//Min-Heap
+			double[] key = dataArray[i];
+			int smallest = 0;
+			do {
+				smallest = (i+1)*2-1;
+				if (((i+1)*2<array_size)&&(dataArray[(i+1)*2][b]<dataArray[(i+1)*2-1][b])) {
+					smallest = (i+1)*2;
+				}
+				if (((i+1)*2-1<array_size)&&(key[b]>dataArray[smallest][b])){
+					dataArray[i] = dataArray[smallest];
+					i = smallest;
+				} else {
+					dataArray[i] = key;
+				}
+			} while(key != dataArray[i]);
+		}
+
+		for(int i = array_size-1; i>=1; i--){
+			double[] key = dataArray[i];
+			dataArray[i] = dataArray[0];
+			dataArray[0] = key;
+			array_size = array_size - 1;
+			int j = 0;
+			key = dataArray[j];
+			int smallest = 0;
+			do {
+				smallest = (j+1)*2-1;
+				if (((j+1)*2<array_size)&&(dataArray[(j+1)*2][b]<dataArray[(j+1)*2-1][b])) {
+					smallest = (j+1)*2;
+				}
+				if (((j+1)*2-1<array_size)&&(key[b]>dataArray[smallest][b])){
+					dataArray[j] = dataArray[smallest];
+					j = smallest;
+				} else {
+					dataArray[j] = key;
+				}
+			} while(key != dataArray[j]);
+		}
+		return dataArray;
+	}
+
+    /**
+	 * sorting an array by one of the columns, and then return a increasing array.
+	 * @param a - unsorted double array
+	 * @param b - the column number of array
+	 * @return sorted array
+	 */
+	public static double[][] dataSort(double[][] a, int b){
+		double[][] dataArray = a;
+		int array_size = a.length;
+		if (a[0].length <= b) {
+			return null;
+		}
+		//Build-Max-Heap
+		for(int i = new Double(Math.floor((array_size-1)/2)).intValue(); i>=0; i--){
+			//Max-Heap
+			double[] key = dataArray[i];
+			int largest = 0;
+			do {
+				largest = (i+1)*2-1;
+				if (((i+1)*2<array_size)&&(dataArray[(i+1)*2][b]>dataArray[(i+1)*2-1][b])) {
+					largest = (i+1)*2;
+				}
+				if (((i+1)*2-1<array_size)&&(key[b]<dataArray[largest][b])){
+					dataArray[i] = dataArray[largest];
+					i = largest;
+				} else {
+					dataArray[i] = key;
+				}
+			} while(key != dataArray[i]);
+		}
+		for(int i = array_size-1; i>=1; i--){
+			double[] key = dataArray[i];
+			dataArray[i] = dataArray[0];
+			dataArray[0] = key;
+			array_size = array_size - 1;
+			int j = 0;
+			key = dataArray[j];
+			int largest = 0;
+			do {
+				largest = (j+1) * 2 - 1;
+				if (((j+1) * 2<array_size)&&(dataArray[(j+1) * 2][b]>dataArray[(j+1) * 2 - 1][b])) {
+					largest = (j+1) * 2;
+				}
+				if (((j+1) * 2-1<array_size)&&(key[b]<dataArray[largest][b])){
+					dataArray[j] = dataArray[largest];
+					j = largest;
+				} else {
+					dataArray[j] = key;
+				}
+			} while(key != dataArray[j]);
+		}
+		return dataArray;
     }
 
 	/**
@@ -652,6 +762,9 @@ public class NOAUtil {
                     totalEdges = numOfAnn*(numOfAnn-1)/2;
                 }
                 goNodeCountRefMap.put(obj.toString(), totalEdges+"");
+            } else {
+                //goNodeCountRefMap.put(obj.toString(), totalEdges+"");
+                System.out.print(obj+" doesn't exist...... ");
             }
         }
     }
