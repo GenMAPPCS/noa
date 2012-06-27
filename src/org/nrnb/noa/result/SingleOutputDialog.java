@@ -142,7 +142,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         resultTable.addMouseListener(this);
-        resultTable.setAutoCreateRowSorter(true);
+        //resultTable.setAutoCreateRowSorter(true);
         setColumnWidths(resultTable);        
     }
     public void setColumnWidths(JTable table) {
@@ -198,7 +198,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         goMosaicButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        resultTable = new javax.swing.JTable();
+        resultTable = new NOASortTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 

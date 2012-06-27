@@ -58,6 +58,7 @@ class NOABatchEnrichmentTask implements Task {
     public List potentialGOList = new ArrayList();
     private JDialog dialog;
     private int formatSign = 0;
+    private boolean isSortedNetwork = true;
     private ArrayList<String> networkNameArray = new ArrayList<String>();
     private String tempHeatmapFileName = "";
     private int networkSize = 100;
@@ -67,7 +68,8 @@ class NOABatchEnrichmentTask implements Task {
     public NOABatchEnrichmentTask(boolean isEdge, String inputFilePath,
             boolean isWholeNet, Object edgeAnnotation, Object statMethod,
             Object corrMethod, Object pvalue, String speciesDerbyFile,
-            String speciesGOFile, Object idType, String ensemblType, int formatSign) {
+            String speciesGOFile, Object idType, String ensemblType, int formatSign,
+            boolean isSortedNetwork) {
         if(isEdge)
             this.algType = NOAStaticValues.Algorithm_EDGE;
         else
@@ -83,6 +85,7 @@ class NOABatchEnrichmentTask implements Task {
         this.idType = idType;
         this.ensemblIDType = ensemblType;
         this.formatSign = formatSign;
+        this.isSortedNetwork = isSortedNetwork;
     }
 
     public void run() {
@@ -357,6 +360,7 @@ class NOABatchEnrichmentTask implements Task {
                         //System.out.println(pvalueMatrix[network200List.size()][i]);
                         //System.out.println(network200List.size()*2);
                     }
+
                     //int networkSize = 100;
 //                    if(network200List.size()<networkSize)
 //                        networkSize = network200List.size();
@@ -391,7 +395,8 @@ class NOABatchEnrichmentTask implements Task {
                         goSize = countPvalue;
                     double[][] heatmapPvalueMatrix = new double[networkSize][goSize];
                     sumPvaluePerGO = NOAUtil.dataSort(sumPvaluePerGO, 1 ,1);
-                    sumPvaluePerNetwork = NOAUtil.dataSort(sumPvaluePerNetwork, 1);
+                    if(this.isSortedNetwork)
+                        sumPvaluePerNetwork = NOAUtil.dataSort(sumPvaluePerNetwork, 1);
                     List heatmapGOList = new ArrayList();
                     List heatmapNetworkList = new ArrayList();
                     countPvalue = 0;
@@ -428,7 +433,8 @@ class NOABatchEnrichmentTask implements Task {
                     }
 
                     sumPvaluePerGO1 = NOAUtil.dataSort(sumPvaluePerGO1, 1, 1);
-                    sumPvaluePerNetwork1 = NOAUtil.dataSort(sumPvaluePerNetwork1, 1);
+                    if(this.isSortedNetwork)
+                        sumPvaluePerNetwork1 = NOAUtil.dataSort(sumPvaluePerNetwork1, 1);
                     List heatmapGOList1 = new ArrayList();
                     List heatmapNetworkList1 = new ArrayList();
                     for(int i=0;i<goSize;i++) {
@@ -449,8 +455,9 @@ class NOABatchEnrichmentTask implements Task {
                     for(int i=0;i<goSize;i++){
                         if(goDescMap.containsKey(heatmapGOList1.get(i).toString())) {
                             go4Display[i] = goDescMap.get(heatmapGOList1.get(i).toString());
-                            if(go4Display[i].toString().length()>23)
-                                go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+                            if(go4Display[i].toString().length()>45)
+                                //go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+                                go4Display[i] = go4Display[i].toString().substring(0, 45);
                         } else {
                             go4Display[i] = heatmapGOList1.get(i);
                         }
@@ -607,6 +614,7 @@ class NOABatchEnrichmentTask implements Task {
                             countPvalue++;
                         }
                     }
+
 //                    double[][] heatmapPvalueMatrix = new double[network200List.size()][countPvalue];
 //                    List heatmapGOList = new ArrayList();
 //                    countPvalue = 0;
@@ -688,7 +696,8 @@ class NOABatchEnrichmentTask implements Task {
                         goSize = countPvalue;
                     double[][] heatmapPvalueMatrix = new double[networkSize][goSize];
                     sumPvaluePerGO = NOAUtil.dataSort(sumPvaluePerGO, 1 ,1);
-                    sumPvaluePerNetwork = NOAUtil.dataSort(sumPvaluePerNetwork, 1);
+                    if(this.isSortedNetwork)
+                        sumPvaluePerNetwork = NOAUtil.dataSort(sumPvaluePerNetwork, 1);
                     List heatmapGOList = new ArrayList();
                     List heatmapNetworkList = new ArrayList();
                     countPvalue = 0;
@@ -725,7 +734,8 @@ class NOABatchEnrichmentTask implements Task {
                     }
 
                     sumPvaluePerGO1 = NOAUtil.dataSort(sumPvaluePerGO1, 1, 1);
-                    sumPvaluePerNetwork1 = NOAUtil.dataSort(sumPvaluePerNetwork1, 1);
+                    if(this.isSortedNetwork)
+                        sumPvaluePerNetwork1 = NOAUtil.dataSort(sumPvaluePerNetwork1, 1);
                     List heatmapGOList1 = new ArrayList();
                     List heatmapNetworkList1 = new ArrayList();
                     for(int i=0;i<goSize;i++) {
@@ -746,12 +756,14 @@ class NOABatchEnrichmentTask implements Task {
                     for(int i=0;i<goSize;i++){
                         if(goDescMap.containsKey(heatmapGOList1.get(i).toString())) {
                             go4Display[i] = goDescMap.get(heatmapGOList1.get(i).toString());
-                            if(go4Display[i].toString().length()>23)
-                                go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+                            if(go4Display[i].toString().length()>45)
+                                //go4Display[i] = go4Display[i].toString().substring(0, 15)+"..."+go4Display[i].toString().substring(go4Display[i].toString().length()-5,go4Display[i].toString().length());
+                                go4Display[i] = go4Display[i].toString().substring(0, 45);
                         } else {
                             go4Display[i] = heatmapGOList1.get(i);
                         }
                     }
+
                     taskMonitor.setStatus("Generating heatmap ......");
                     HeatChart chart = new HeatChart(sortedHeatmapPvalueMatrix);
                     chart.setHighValueColour(Color.BLUE);

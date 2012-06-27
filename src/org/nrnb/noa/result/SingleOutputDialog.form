@@ -213,6 +213,9 @@
               <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new org.nrnb.noa.result.NOASortTable()"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>
