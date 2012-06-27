@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.nrnb.noa.result;
 
+import cytoscape.data.CyAttributes;
+import java.util.Collections;
 import javax.swing.table.DefaultTableModel;
 
 public class OutputTableModel extends DefaultTableModel{
@@ -32,5 +34,26 @@ public class OutputTableModel extends DefaultTableModel{
 	public boolean isCellEditable(int arg0, int arg1) {
 		// TODO Auto-generated method stub
 		return false;
-	}		
+	}
+
+        	/**
+	 *  DOCUMENT ME!
+	 *
+	 * @param col DOCUMENT ME!
+	 *
+	 * @return  DOCUMENT ME!
+	 */
+	public boolean isSortable(int col) {
+		return true;
+	}
+
+	/**
+	 *  DOCUMENT ME!
+	 *
+	 * @param col DOCUMENT ME!
+	 * @param ascending DOCUMENT ME!
+	 */
+	public void sortColumn(int col, boolean ascending) {
+		Collections.sort(getDataVector(), new NOAColumnComparator(col, getColumnName(col), ascending));
+	}
 }

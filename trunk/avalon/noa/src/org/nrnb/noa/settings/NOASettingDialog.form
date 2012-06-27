@@ -39,7 +39,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="NOAMainTabbedPane" pref="420" max="32767" attributes="0"/>
+          <Component id="NOAMainTabbedPane" pref="441" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -47,7 +47,7 @@
     <Container class="javax.swing.JTabbedPane" name="NOAMainTabbedPane">
       <Properties>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-          <Dimension value="[701, 420]"/>
+          <Dimension value="[701, 440]"/>
         </Property>
       </Properties>
       <AccessibilityProperties>
@@ -57,6 +57,11 @@
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
         <Container class="javax.swing.JPanel" name="SinglePanel">
+          <Properties>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[696, 422]"/>
+            </Property>
+          </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Single">
@@ -84,14 +89,14 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="sInpPanel" min="-2" max="-2" attributes="0"/>
+                      <Component id="sInpPanel" min="-2" pref="100" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="sAnnPanel" min="-2" pref="111" max="-2" attributes="2"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="sParPanel" min="-2" max="-2" attributes="2"/>
+                      <Component id="sParPanel" min="-2" pref="121" max="-2" attributes="2"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="sButtonPanel" min="-2" pref="41" max="-2" attributes="0"/>
-                      <EmptySpace pref="21" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -103,6 +108,9 @@
                   <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                     <TitledBorder title="Input"/>
                   </Border>
+                </Property>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[672, 100]"/>
                 </Property>
               </Properties>
               <AuxValues>
@@ -370,6 +378,9 @@
                   <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                     <TitledBorder title="Set Parameters"/>
                   </Border>
+                </Property>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[672, 121]"/>
                 </Property>
               </Properties>
 
@@ -855,6 +866,11 @@
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="BatchPanel">
+          <Properties>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[696, 422]"/>
+            </Property>
+          </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Batch">
@@ -889,7 +905,7 @@
                       <Component id="bParPanel" min="-2" max="-2" attributes="2"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="bButtonPanel" min="-2" pref="41" max="-2" attributes="0"/>
-                      <EmptySpace pref="20" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -912,13 +928,13 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="bInpAlgLabel" alignment="0" min="-2" pref="110" max="-2" attributes="1"/>
                               <Component id="bInpTesLabel" alignment="0" min="-2" pref="110" max="-2" attributes="1"/>
                               <Component id="bInpRefLabel" alignment="0" min="-2" pref="110" max="-2" attributes="1"/>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" attributes="0">
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -933,15 +949,16 @@
                                   <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" attributes="0">
-                                  <Component id="bInpTesPatTextField" min="-2" pref="279" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
+                                  <EmptySpace min="4" pref="4" max="4" attributes="0"/>
+                                  <Component id="bInpTesPatTextField" pref="279" max="32767" attributes="0"/>
+                                  <EmptySpace min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="bInpRefCliRadioButton" pref="200" max="32767" attributes="0"/>
                               <Component id="bInpTesUplButton" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="51" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" pref="51" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1141,31 +1158,39 @@
                     <TitledBorder title="Set Parameters"/>
                   </Border>
                 </Property>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[672, 121]"/>
+                </Property>
               </Properties>
 
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
+                      <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="bParCorLabel" alignment="0" min="-2" pref="180" max="-2" attributes="1"/>
-                              <Component id="bParEdgAnnLabel" min="-2" pref="180" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="bParEdgComboBox" alignment="0" pref="120" max="32767" attributes="0"/>
-                              <Component id="bParCorComboBox" alignment="0" pref="120" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="bParStaLabel" alignment="0" min="-2" pref="168" max="-2" attributes="1"/>
-                              <Component id="bParPvaLabel" alignment="0" min="-2" pref="168" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="bParStaComboBox" alignment="0" pref="120" max="32767" attributes="0"/>
-                              <Component id="bParPvaTextField" alignment="0" pref="120" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="bParSorCheckBox" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="bParCorLabel" alignment="0" min="-2" pref="180" max="-2" attributes="1"/>
+                                      <Component id="bParEdgAnnLabel" min="-2" pref="180" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="bParEdgComboBox" alignment="0" pref="120" max="32767" attributes="0"/>
+                                      <Component id="bParCorComboBox" alignment="0" pref="120" max="32767" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="bParStaLabel" alignment="0" min="-2" pref="168" max="-2" attributes="1"/>
+                                      <Component id="bParPvaLabel" alignment="0" min="-2" pref="168" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="bParStaComboBox" alignment="0" pref="120" max="32767" attributes="0"/>
+                                      <Component id="bParPvaTextField" alignment="0" pref="120" max="32767" attributes="0"/>
+                                  </Group>
+                              </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1188,7 +1213,9 @@
                               <Component id="bParPvaTextField" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
                               <Component id="bParPvaLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
+                          <Component id="bParSorCheckBox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1316,6 +1343,15 @@
                       <Dimension value="[108, 18]"/>
                     </Property>
                   </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="bParSorCheckBox">
+                  <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
+                    <Property name="text" type="java.lang.String" value="Sort networks/sets by p-value"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bParSorCheckBoxActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>

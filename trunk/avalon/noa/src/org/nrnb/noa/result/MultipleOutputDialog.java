@@ -252,15 +252,18 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         resultTable.addMouseListener(this);
-        resultTable.setAutoCreateRowSorter(true);
+        //resultTable.setAutoCreateRowSorter(true);
         setColumnWidths(resultTable);
 
         outputModelForOverlap = new OutputTableModel(cellsForOverlap, tableTitleForOverlap);
         overlapTable.setModel(outputModelForOverlap);
+        overlapTable.getColumnModel().getColumn(0).setMinWidth(70);
+        overlapTable.getColumnModel().getColumn(1).setMinWidth(40);
+        overlapTable.getColumnModel().getColumn(2).setMinWidth(100);
         overlapTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         overlapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         overlapTable.addMouseListener(this);
-        overlapTable.setAutoCreateRowSorter(true);
+        //overlapTable.setAutoCreateRowSorter(true);
 
         resultTabbedPane.addChangeListener(this);
         heatmapButton.setVisible(false);
@@ -322,9 +325,9 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         heatmapButton = new javax.swing.JButton();
         resultTabbedPane = new javax.swing.JTabbedPane();
         jScrollPane1 = new javax.swing.JScrollPane();
-        resultTable = new javax.swing.JTable();
+        resultTable = new NOASortTable();
         jScrollPane2 = new javax.swing.JScrollPane();
-        overlapTable = new javax.swing.JTable();
+        overlapTable = new NOASortTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {

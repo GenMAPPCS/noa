@@ -22,6 +22,7 @@ import cytoscape.task.Task;
 import cytoscape.task.TaskMonitor;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,10 +39,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -49,6 +53,7 @@ import org.nrnb.noa.NOA;
 import org.nrnb.noa.utils.IdMapping;
 import org.nrnb.noa.utils.NOAStaticValues;
 import org.nrnb.noa.utils.NOAUtil;
+import org.nrnb.noa.utils.WaitDialog;
 
 public class NOASettingDialog extends javax.swing.JDialog implements ChangeListener{
     public String annotationSpeciesCode = "";
@@ -62,6 +67,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     private final JFileChooser fc = new JFileChooser();
     private int initialTag = -1;
     private int formatSign = -1;
+    private String batchModeSampleID = "";
 
 
     private List<String> batchdownloadDBList = new ArrayList<String>();
@@ -70,7 +76,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     public NOASettingDialog(java.awt.Frame parent, boolean model) {
         super(parent, model);
         String networkTitle = Cytoscape.getCurrentNetwork().getTitle();
-        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 05/17/2012";
+        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 06/11/2012";
         if(!networkTitle.trim().equals("0"))
             dialogTitle += " - "+networkTitle;
         this.setTitle(dialogTitle);
@@ -397,7 +403,17 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                     .toString()));
         }
     }
-    
+
+    private void setDefaultAttType4Batch(String sampleID) {
+        Set<String> guessResult = IdMapping.guessIdType(sampleID);
+        if(guessResult.isEmpty()) {
+            bAnnTypComboBox.setSelectedIndex(findMatchType("Ensembl"));
+        } else {
+            bAnnTypComboBox.setSelectedIndex(findMatchType(guessResult.toArray()[0]
+                    .toString()));
+        }
+    }
+
     private int findMatchType(String matchSeq) {
         if(matchSeq.equals("Ensembl") && annotationSpeciesCode.equals("At"))
             matchSeq = "Gramene Arabidopsis";
@@ -487,6 +503,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         bParEdgComboBox = new javax.swing.JComboBox();
         bParStaComboBox = new javax.swing.JComboBox();
         bParCorComboBox = new javax.swing.JComboBox();
+        bParSorCheckBox = new javax.swing.JCheckBox();
         bAnnPanel = new javax.swing.JPanel();
         bAnnMesLabel = new javax.swing.JLabel();
         bAnnMesButton = new javax.swing.JButton();
@@ -504,9 +521,12 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        NOAMainTabbedPane.setPreferredSize(new java.awt.Dimension(701, 420));
+        NOAMainTabbedPane.setPreferredSize(new java.awt.Dimension(701, 440));
+
+        SinglePanel.setPreferredSize(new java.awt.Dimension(696, 422));
 
         sInpPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
+        sInpPanel.setPreferredSize(new java.awt.Dimension(672, 100));
 
         sInpAlgLabel.setText("Algorithm");
         sInpAlgLabel.setMaximumSize(new java.awt.Dimension(110, 14));
@@ -645,6 +665,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         );
 
         sParPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Set Parameters"));
+        sParPanel.setPreferredSize(new java.awt.Dimension(672, 121));
 
         sParEdgLabel.setText("Edge annotation");
         sParEdgLabel.setMaximumSize(new java.awt.Dimension(180, 14));
@@ -845,7 +866,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                     .addComponent(sAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sAnnIdeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         sSubmitButton.setText("Run");
@@ -906,17 +927,19 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
             SinglePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SinglePanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(sInpPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(sInpPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(sParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         NOAMainTabbedPane.addTab("Single", SinglePanel);
+
+        BatchPanel.setPreferredSize(new java.awt.Dimension(696, 422));
 
         bInpPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -1012,12 +1035,13 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                             .addComponent(bInpAlgNodRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE))
                         .addGap(6, 6, 6))
                     .addGroup(bInpPanelLayout.createSequentialGroup()
-                        .addComponent(bInpTesPatTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(4, 4, 4)
+                        .addComponent(bInpTesPatTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addGroup(bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(bInpRefCliRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
                     .addComponent(bInpTesUplButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(51, Short.MAX_VALUE))
+                .addGap(51, 51, 51))
         );
         bInpPanelLayout.setVerticalGroup(
             bInpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1041,6 +1065,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         );
 
         bParPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Set Parameters"));
+        bParPanel.setPreferredSize(new java.awt.Dimension(672, 121));
 
         bParEdgAnnLabel.setText("Edge annotation");
         bParEdgAnnLabel.setMaximumSize(new java.awt.Dimension(180, 14));
@@ -1086,27 +1111,38 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         bParCorComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         bParCorComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
+        bParSorCheckBox.setSelected(true);
+        bParSorCheckBox.setText("Sort networks/sets by p-value");
+        bParSorCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bParSorCheckBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout bParPanelLayout = new javax.swing.GroupLayout(bParPanel);
         bParPanel.setLayout(bParPanelLayout);
         bParPanelLayout.setHorizontalGroup(
             bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(bParPanelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bParPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bParCorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(bParEdgAnnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bParEdgComboBox, 0, 120, Short.MAX_VALUE)
-                    .addComponent(bParCorComboBox, 0, 120, Short.MAX_VALUE))
-                .addGap(44, 44, 44)
-                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bParStaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bParStaComboBox, 0, 120, Short.MAX_VALUE)
-                    .addComponent(bParPvaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
+                .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(bParSorCheckBox)
+                    .addGroup(bParPanelLayout.createSequentialGroup()
+                        .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bParCorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(bParEdgAnnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bParEdgComboBox, 0, 120, Short.MAX_VALUE)
+                            .addComponent(bParCorComboBox, 0, 120, Short.MAX_VALUE))
+                        .addGap(44, 44, 44)
+                        .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bParStaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(bParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bParStaComboBox, 0, 120, Short.MAX_VALUE)
+                            .addComponent(bParPvaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         bParPanelLayout.setVerticalGroup(
@@ -1124,6 +1160,8 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                     .addComponent(bParCorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bParPvaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bParPvaLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(11, 11, 11)
+                .addComponent(bParSorCheckBox)
                 .addContainerGap())
         );
 
@@ -1241,7 +1279,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                     .addComponent(bAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bAnnIdeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         bSubmitButton.setText("Run");
@@ -1309,7 +1347,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                 .addComponent(bParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(bButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         NOAMainTabbedPane.addTab("Batch", BatchPanel);
@@ -1322,7 +1360,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(NOAMainTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+            .addComponent(NOAMainTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE)
         );
 
         NOAMainTabbedPane.getAccessibleContext().setAccessibleName("Single");
@@ -1377,19 +1415,20 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     private void bAnnSpeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAnnSpeComboBoxActionPerformed
         // TODO add your handling code here:
         //System.out.println(bAnnSpeComboBox.getSelectedItem().toString());
-        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
-        final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
-        warningDialog.addPropertyChangeListener(
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    String prop = e.getPropertyName();
-                    if (dialog.isVisible())
-                        dialog.setVisible(false);
-                }
-            });
+//        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
+//        final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
+//        warningDialog.addPropertyChangeListener(
+//            new PropertyChangeListener() {
+//                public void propertyChange(PropertyChangeEvent e) {
+//                    String prop = e.getPropertyName();
+//                    if (dialog.isVisible())
+//                        dialog.setVisible(false);
+//                }
+//            });
+        final JDialog dialog = new WaitDialog(this, "Retrieving data for selected species...");
 
         if(initialTag == -1) {
-            dialog.setContentPane(warningDialog);
+            //dialog.setContentPane(warningDialog);
             dialog.setLocation(this.getLocation().x+200, this.getLocation().y+150);
             dialog.pack();
             dialog.setVisible(true);
@@ -1451,7 +1490,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                 bParEdgComboBox.getSelectedItem(), bParStaComboBox.getSelectedItem(),
                 bParCorComboBox.getSelectedItem(), bParPvaTextField.getText(),
                 localDerbyDB, localGOslimDB, bAnnTypComboBox.getSelectedItem(),
-                idMappingTypeValues.get(findMatchType("Ensembl")), formatSign);
+                idMappingTypeValues.get(findMatchType("Ensembl")), formatSign, bParSorCheckBox.isSelected());
         // Configure JTask Dialog Pop-Up Box
         final JTaskConfig jTaskConfig = new JTaskConfig();
         jTaskConfig.setOwner(Cytoscape.getDesktop());
@@ -1486,26 +1525,28 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
 
     private void sAnnIdeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sAnnIdeComboBoxActionPerformed
         // TODO add your handling code here:
-        //setDefaultAttType(rAnnIdeComboBox.getSelectedItem().toString());
+        setDefaultAttType(sAnnIdeComboBox.getSelectedItem().toString());
 }//GEN-LAST:event_sAnnIdeComboBoxActionPerformed
 
     private void sAnnSpeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sAnnSpeComboBoxActionPerformed
         // TODO add your handling code here:
         //Regenerate list of ID types when user select another species.
         NOA.logger.debug("change species");        
-        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
-        final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
-        warningDialog.addPropertyChangeListener(
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    String prop = e.getPropertyName();
-                    if (dialog.isVisible())
-                        dialog.setVisible(false);
-                }
-            });
+//        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
+//        final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
+        final JDialog dialog = new WaitDialog(this, "Retrieving data for selected species...");
+
+//        warningDialog.addPropertyChangeListener(
+//            new PropertyChangeListener() {
+//                public void propertyChange(PropertyChangeEvent e) {
+//                    String prop = e.getPropertyName();
+//                    if (dialog.isVisible())
+//                        dialog.setVisible(false);
+//                }
+//            });
 
         if(initialTag == -1) {
-            dialog.setContentPane(warningDialog);
+            //dialog.setContentPane(warningDialog);
             dialog.setLocation(this.getLocation().x+200, this.getLocation().y+150);
             dialog.pack();
             dialog.setVisible(true);
@@ -1701,8 +1742,10 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                 String[] temp = inputLine.trim().split("\t");
                 if(temp.length == 1) {
                     formatSign = NOAStaticValues.SET_FORMAT;
+                    batchModeSampleID = inputLine.trim();
                 } else if(temp.length == 2) {
                     formatSign = NOAStaticValues.NETWORK_FORMAT;
+                    batchModeSampleID = temp[0].trim();
                 } else {
                     formatSign = NOAStaticValues.WRONG_FORMAT;
                 }
@@ -1717,9 +1760,15 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                 bInpAlgEdgRadioButton.setEnabled(true);
                 bInpAlgEdgRadioButton.setSelected(true);
             }
+            this.setDefaultAttType4Batch(this.batchModeSampleID);
+
             checkGroupButtonSelection();
         }
     }//GEN-LAST:event_bInpTesUplButtonActionPerformed
+
+    private void bParSorCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bParSorCheckBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bParSorCheckBoxActionPerformed
 
     /**
     * @param args the command line arguments
@@ -1773,6 +1822,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     private javax.swing.JPanel bParPanel;
     private javax.swing.JLabel bParPvaLabel;
     private javax.swing.JTextField bParPvaTextField;
+    private javax.swing.JCheckBox bParSorCheckBox;
     private javax.swing.JComboBox bParStaComboBox;
     private javax.swing.JLabel bParStaLabel;
     private javax.swing.ButtonGroup bRefButtonGroup;
@@ -1824,5 +1874,4 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                             "Please load a network first!", NOA.pluginName,
                             JOptionPane.WARNING_MESSAGE);
     }
-
 }
