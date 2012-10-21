@@ -20,7 +20,7 @@ public class NOAStaticValues {
     public static final String CC_ATTNAME = "annotation.GO CELLULAR_COMPONENT";
     public static final String MF_ATTNAME = "annotation.GO MOLECULAR_FUNCTION";
     public static String[] speciesList = {"Human", "Mouse", "Yeast", "Arabidopsis"};
-    public static final String hourGlassGIF = "/images/hourglass1.gif";
+    public static final String hourGlassGIF = "/images/Hourglass.gif";
     public static final String supportedSpecieslist = "/supported_species.tab";
     public static final String bridgedbSpecieslist = "/resources/organisms.txt";
     public static final String genmappcsDatabaseDir = "http://genmapp.org/genmappcs/databases/";

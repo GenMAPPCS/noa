@@ -33,6 +33,7 @@ public class WaitDialog extends JDialog{
             contextPanel.setLayout(new BorderLayout());
             JLabel b = new JLabel("",new ImageIcon(this.getClass()
             .getResource(NOAStaticValues.hourGlassGIF)),JLabel.CENTER);
+            this.setSize(300, 75);
             contextPanel.add(b, BorderLayout.CENTER);
             this.add(contextPanel);
             this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);

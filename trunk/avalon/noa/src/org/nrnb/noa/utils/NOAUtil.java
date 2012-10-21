@@ -195,6 +195,22 @@ public class NOAUtil {
         return tag;
     }
 
+    public static boolean writeString(String a, String MyFilePath) {
+		boolean tag = true;
+		try {
+			FileWriter writer = new FileWriter(MyFilePath, true);
+			BufferedWriter bufWriter = new BufferedWriter(writer);
+			bufWriter.write(a);
+			bufWriter.newLine();
+			bufWriter.close();
+			writer.close();
+		} catch (Exception e) {
+			tag = false;
+			e.printStackTrace();
+		}
+		return tag;
+	}
+
     public static boolean writeDoubleArray(double[][] value, String MyFilePath) {
 		boolean tag = true;
 		try {
@@ -533,17 +549,19 @@ public class NOAUtil {
             Set<String> nodeList, Map<String, Set<String>> geneGOCountMap, List potentialGOList) {
         for(String node : nodeList) {
             for(int i=0;i<3;i++){
-                Set<String> GOList = idGOMapArray[i].get(node);
-                for(String GOID : GOList) {
-                    if(potentialGOList.indexOf(GOID)!=-1){
-                        if(geneGOCountMap.containsKey(GOID)) {
-                            Set<String> tempSet = geneGOCountMap.get(GOID);
-                            tempSet.add(node);
-                            geneGOCountMap.put(GOID, tempSet);
-                        } else {
-                            Set<String> tempSet = new HashSet<String>();
-                            tempSet.add(node);
-                            geneGOCountMap.put(GOID, tempSet);
+                if(idGOMapArray[i].containsKey(node)) {
+                    Set<String> GOList = idGOMapArray[i].get(node);
+                    for(String GOID : GOList) {
+                        if(potentialGOList.indexOf(GOID)!=-1){
+                            if(geneGOCountMap.containsKey(GOID)) {
+                                Set<String> tempSet = geneGOCountMap.get(GOID);
+                                tempSet.add(node);
+                                geneGOCountMap.put(GOID, tempSet);
+                            } else {
+                                Set<String> tempSet = new HashSet<String>();
+                                tempSet.add(node);
+                                geneGOCountMap.put(GOID, tempSet);
+                            }
                         }
                     }
                 }
@@ -640,34 +658,57 @@ public class NOAUtil {
 	public static void retrieveEdgeCountMapBatchMode(Map<String, Set<String>>[] idGOMapArray, 
             Set<String> allEdgeSet, Map<String, Set<String>> geneGOCountMap, List potentialGOList, String edgeAlg) {
         for(String edge:allEdgeSet){
+            //System.out.println(edge);
             String[] nodesArray = edge.split("\t");
             Set<String> edgeAnnotation = new HashSet();
             if(nodesArray.length>1){
                 for(int i=0;i<3;i++){
-                    List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[0]));
-                    List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[1]));
-                    if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
-                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
-                    else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
-                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2));
-                    else
-                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+                    List<String> resultList = new ArrayList();
+                    //System.out.println(nodesArray[0]+" : "+idGOMapArray[i].containsKey(nodesArray[0]));
+                    //System.out.println(nodesArray[1]+" : "+idGOMapArray[i].containsKey(nodesArray[1]));
+                    if(idGOMapArray[i].containsKey(nodesArray[0])&&idGOMapArray[i].containsKey(nodesArray[1])) {
+                        List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[0]));
+                        List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[1]));
+                        //System.out.println(nodeGOList1);
+                        //System.out.println(nodeGOList2);
+                        if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                            resultList = EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2);
+                        else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                            resultList = EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2);
+                        else
+                            resultList = EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2);
+                    } else if((!idGOMapArray[i].containsKey(nodesArray[0]))||(!idGOMapArray[i].containsKey(nodesArray[1]))) {
+                        if (edgeAlg.equals(NOAStaticValues.EDGE_Union)){
+                            if(!idGOMapArray[i].containsKey(nodesArray[0])){
+                                resultList = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[1]));
+                            } else {
+                                resultList = new ArrayList((Set<String>)idGOMapArray[i].get(nodesArray[0]));
+                            }
+                        }
+                    }
+                    for(String eAnno:resultList)
+                        edgeAnnotation.add(eAnno);
                 }
             }
+            //System.out.println(edgeAnnotation);
             for(String GOID : edgeAnnotation) {
+                //System.out.println(GOID);
                 if(potentialGOList.indexOf(GOID)!=-1){
                     if(geneGOCountMap.containsKey(GOID)) {
                         Set<String> tempSet = geneGOCountMap.get(GOID);
                         tempSet.add(edge.replace("\t", "-"));
                         geneGOCountMap.put(GOID, tempSet);
+                        //System.out.println(GOID+"\t"+tempSet);
                     } else {
                         Set<String> tempSet = new HashSet<String>();
                         tempSet.add(edge.replace("\t", "-"));
                         geneGOCountMap.put(GOID, tempSet);
+                        //System.out.println(GOID+"\t"+tempSet);
                     }
                 }
             }
         }
+        //System.out.println(geneGOCountMap.size());
 	}
 
     /**
@@ -779,14 +820,35 @@ public class NOAUtil {
             for(int j=i+1;j<nodesArray.length;j++){
                 Set<String> edgeAnnotation = new HashSet();
                 for(int n=0;n<3;n++){
-                    List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[i]));
-                    List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[j]));
-                    if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
-                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
-                    else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
-                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2));
-                    else
-                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+                    List<String> resultList = new ArrayList();
+                    if(idGOMapArray[n].containsKey(nodesArray[i])&&idGOMapArray[n].containsKey(nodesArray[j])) {
+                        List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[i]));
+                        List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[j]));
+                        if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+                            resultList = EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2);
+                        else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+                            resultList = EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2);
+                        else
+                            resultList = EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2);
+                    } else if((!idGOMapArray[n].containsKey(nodesArray[i]))||(!idGOMapArray[n].containsKey(nodesArray[j]))) {
+                        if (edgeAlg.equals(NOAStaticValues.EDGE_Union)){
+                            if(!idGOMapArray[n].containsKey(nodesArray[i])){
+                                resultList = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[j]));
+                            } else {
+                                resultList = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[i]));
+                            }
+                        }
+                    }
+                    for(String eAnno:resultList)
+                        edgeAnnotation.add(eAnno);
+//                    List<String> nodeGOList1 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[i]));
+//                    List<String> nodeGOList2 = new ArrayList((Set<String>)idGOMapArray[n].get(nodesArray[j]));
+//                    if(edgeAlg.equals(NOAStaticValues.EDGE_Intersection))
+//                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
+//                    else if (edgeAlg.equals(NOAStaticValues.EDGE_Union))
+//                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeUnion(nodeGOList1, nodeGOList2));
+//                    else
+//                        edgeAnnotation.addAll(EdgeAnnotationMethod.edgeIntersection(nodeGOList1, nodeGOList2));
                 }
                 for(String GOID : edgeAnnotation) {
                     if(potentialGOList.indexOf(GOID)!=-1){
