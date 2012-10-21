@@ -15,7 +15,6 @@
  ******************************************************************************/
 package org.nrnb.noa.result;
 
-import cytoscape.data.CyAttributes;
 import java.util.Collections;
 import javax.swing.table.DefaultTableModel;
 
@@ -36,7 +35,7 @@ public class OutputTableModel extends DefaultTableModel{
 		return false;
 	}
 
-        	/**
+        /**
 	 *  DOCUMENT ME!
 	 *
 	 * @param col DOCUMENT ME!

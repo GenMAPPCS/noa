@@ -21,10 +21,7 @@ import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +49,9 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
     
     /** Creates new form SingleOutputDialog */
     public SingleOutputDialog(java.awt.Frame parent, boolean modal, 
-            Map<String, Set<String>> goNodeMap,
-            Map<String, String> resultMap, String algType) {
+            Object[][] cells, String algType) {
         super(parent, modal);
-        this.goNodeMap = goNodeMap;
-        this.resultMap = resultMap;
+        this.cells = cells;
         this.algType = algType;
         initComponents();
         initValues();
@@ -69,68 +64,7 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         } else {
             tableTitle = new String [] {"GO ID", "Type", "P-value", "Test", "Reference", "Desciption", "Associated edges"};
         }
-        Object[][] goPvalueArray = new String[resultMap.size()][7];
-        int i = 0;
-        int BPcount = 0;
-        int CCcount = 0;
-        int MFcount = 0;
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass()
-                    .getResource(NOAStaticValues.GO_DescFile).openStream()));
-            String inputLine=in.readLine();
-            while ((inputLine = in.readLine()) != null) {
-                String[] retail = inputLine.split("\t");
-                if(retail.length>=3) {
-                    if(this.resultMap.containsKey(retail[0].trim())) {
-                        goPvalueArray[i][0] = retail[0];
-                        String[] temp = this.resultMap.get(retail[0]).toString().split("\t");
-                        DecimalFormat df1 = new DecimalFormat("#.####");
-                        DecimalFormat df2 = new DecimalFormat("#.####E0");
-                        double pvalue = new Double(temp[0]).doubleValue();
-                        if(pvalue>0.0001)
-                            goPvalueArray[i][2] = df1.format(pvalue);
-                        else
-                            goPvalueArray[i][2] = df2.format(pvalue);
-                        goPvalueArray[i][3] = temp[1];
-                        goPvalueArray[i][4] = temp[2];
-                        goPvalueArray[i][5] = retail[1];
-                        String tempList = this.goNodeMap.get(retail[0]).toString();
-                        goPvalueArray[i][6] = tempList.substring(1, tempList.length()-1).trim();
-                        if(retail[2].equals("biological_process")) {
-                            goPvalueArray[i][1] = "BP";
-                            BPcount++;
-                        } else if (retail[2].equals("cellular_component")) {
-                            goPvalueArray[i][1] = "CC";
-                            CCcount++;
-                        } else {
-                            goPvalueArray[i][1] = "MF";
-                            MFcount++;
-                        }
-                        i++;
-                    }
-                }
-            }
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        goPvalueArray = NOAUtil.dataSort(goPvalueArray, 2);
-        cells = new Object[resultMap.size()][7];
-        int BPindex = 0;
-        int CCindex = BPcount;
-        int MFindex = BPcount+CCcount;
-        for(i=0;i<goPvalueArray.length;i++){
-            if(goPvalueArray[i][1].equals("BP")) {
-                cells[BPindex] = goPvalueArray[i];
-                BPindex++;
-            } else if (goPvalueArray[i][1].equals("CC")) {
-                cells[CCindex] = goPvalueArray[i];
-                CCindex++;
-            } else {
-                cells[MFindex] = goPvalueArray[i];
-                MFindex++;
-            }
-        }
+
         outputModel = new OutputTableModel(cells, tableTitle);
         resultTable.setModel(outputModel);
         resultTable.getColumnModel().getColumn(0).setMinWidth(70);
@@ -143,7 +77,8 @@ public class SingleOutputDialog extends JDialog implements MouseListener {
         resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         resultTable.addMouseListener(this);
         //resultTable.setAutoCreateRowSorter(true);
-        setColumnWidths(resultTable);        
+        setColumnWidths(resultTable);
+        goMosaicButton.setVisible(false);
     }
     public void setColumnWidths(JTable table) {
         int headerwidth = 0;

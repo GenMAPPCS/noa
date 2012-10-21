@@ -16,18 +16,48 @@
 package org.nrnb.noa.settings;
 
 import cytoscape.CyEdge;
+import cytoscape.CyNetwork;
 import cytoscape.CyNode;
 import cytoscape.Cytoscape;
+import cytoscape.data.CyAttributes;
+import cytoscape.data.Semantics;
+import cytoscape.layout.CyLayoutAlgorithm;
+import cytoscape.layout.CyLayouts;
 import cytoscape.task.Task;
 import cytoscape.task.TaskMonitor;
+import cytoscape.view.CyNetworkView;
+import cytoscape.visual.CalculatorCatalog;
+import cytoscape.visual.EdgeAppearanceCalculator;
+import cytoscape.visual.LineStyle;
+import cytoscape.visual.NodeAppearanceCalculator;
+import cytoscape.visual.NodeShape;
+import cytoscape.visual.VisualMappingManager;
+import cytoscape.visual.VisualPropertyDependency;
+import cytoscape.visual.VisualPropertyType;
+import cytoscape.visual.VisualStyle;
+import cytoscape.visual.calculators.BasicCalculator;
+import cytoscape.visual.calculators.Calculator;
+import cytoscape.visual.mappings.BoundaryRangeValues;
+import cytoscape.visual.mappings.ContinuousMapping;
+import cytoscape.visual.mappings.DiscreteMapping;
+import cytoscape.visual.mappings.LinearNumberToColorInterpolator;
+import cytoscape.visual.mappings.LinearNumberToNumberInterpolator;
+import cytoscape.visual.mappings.ObjectMapping;
+import cytoscape.visual.mappings.PassThroughMapping;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import org.nrnb.noa.NOA;
 import org.nrnb.noa.algorithm.CorrectionMethod;
+import org.nrnb.noa.algorithm.EdgeAnnotationMethod;
 import org.nrnb.noa.algorithm.StatMethod;
 import org.nrnb.noa.result.SingleOutputDialog;
 import org.nrnb.noa.utils.NOAStaticValues;
@@ -223,14 +253,14 @@ class NOASingleEnrichmentTask implements Task {
 //                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.CC_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
 //                    NOAUtil.retrieveAllEdgeCountMap(NOAStaticValues.MF_ATTNAME, goNodeCountRefMap, potentialGOList, this.edgeAnnotation);
                     NOAUtil.retrieveAllEdgeCountMap(goNode4EdgeAlgMap, goNodeCountRefMap, potentialGOList, this.edgeAnnotation, numOfNode);
-                    System.out.println("potentialGOList size "+potentialGOList.size());
-                    System.out.println("nodeGO size "+goNode4EdgeAlgMap.size());
+                    //System.out.println("potentialGOList size "+potentialGOList.size());
+                    //System.out.println("nodeGO size "+goNode4EdgeAlgMap.size());
                     for(Object eachGO : potentialGOList) {
                         if(!eachGO.equals("unassigned")) {
                             taskMonitor.setStatus("Calculating p-value for "+eachGO+" ......");
                             int valueA = goNodeMap.get(eachGO).size();
                             int valueB = selectedEdgesSet.size();
-                            System.out.print("Calculating p-value for "+eachGO+" ...... ");
+                            //System.out.print("Calculating p-value for "+eachGO+" ...... ");
                             int valueC = new Integer(goNodeCountRefMap.get(eachGO).toString()).intValue();
                             int valueD = totalEdgesInClique;
                             double pvalue = 0;
@@ -243,7 +273,7 @@ class NOASingleEnrichmentTask implements Task {
                             } else {
                                 pvalue = StatMethod.calHyperGeoPValue(valueA, valueB, valueC, valueD);
                             }
-                            System.out.println(pvalue);
+                            //System.out.println(pvalue);
                             if(pvalue<=this.pvalue)
                                 resultMap.put(eachGO.toString(), pvalue+"\t"+valueA+"/"+valueB+"\t"+valueC+"/"+valueD);
                         }
@@ -261,11 +291,78 @@ class NOASingleEnrichmentTask implements Task {
                 
                 //Step 2: retrieve potential GO list base on "Test network"
             }
+
+            Object[][] goPvalueArray = new String[resultMap.size()][7];
+            int i = 0;
+            int BPcount = 0;
+            int CCcount = 0;
+            int MFcount = 0;
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass()
+                        .getResource(NOAStaticValues.GO_DescFile).openStream()));
+                String inputLine=in.readLine();
+                while ((inputLine = in.readLine()) != null) {
+                    String[] retail = inputLine.split("\t");
+                    if(retail.length>=3) {
+                        if(resultMap.containsKey(retail[0].trim())) {
+                            goPvalueArray[i][0] = retail[0];
+                            String[] temp = resultMap.get(retail[0]).toString().split("\t");
+                            DecimalFormat df1 = new DecimalFormat("#.####");
+                            DecimalFormat df2 = new DecimalFormat("#.####E0");
+                            double pvalue = new Double(temp[0]).doubleValue();
+                            if(pvalue>0.0001)
+                                goPvalueArray[i][2] = df1.format(pvalue);
+                            else
+                                goPvalueArray[i][2] = df2.format(pvalue);
+                            goPvalueArray[i][3] = temp[1];
+                            goPvalueArray[i][4] = temp[2];
+                            goPvalueArray[i][5] = retail[1];
+                            String tempList = goNodeMap.get(retail[0]).toString();
+                            goPvalueArray[i][6] = tempList.substring(1, tempList.length()-1).trim();
+                            if(retail[2].equals("biological_process")) {
+                                goPvalueArray[i][1] = "BP";
+                                BPcount++;
+                            } else if (retail[2].equals("cellular_component")) {
+                                goPvalueArray[i][1] = "CC";
+                                CCcount++;
+                            } else {
+                                goPvalueArray[i][1] = "MF";
+                                MFcount++;
+                            }
+                            i++;
+                        }
+                    }
+                }
+                in.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             
             long pause=System.currentTimeMillis();
             System.out.println("Running time:"+(pause-start)/1000/60+"min "+(pause-start)/1000%60+"sec");
-            if(resultMap.size()>0){
-                dialog = new SingleOutputDialog(Cytoscape.getDesktop(), false, goNodeMap, resultMap, this.algType);
+            if(resultMap.size()>0&&goPvalueArray.length>0){
+                goPvalueArray = NOAUtil.dataSort(goPvalueArray, 2);
+                Object[][] cells = new Object[resultMap.size()][7];
+                int BPindex = 0;
+                int CCindex = BPcount;
+                int MFindex = BPcount+CCcount;
+                for(i=0;i<goPvalueArray.length;i++){
+                    if(goPvalueArray[i][1].equals("BP")) {
+                        cells[BPindex] = goPvalueArray[i];
+                        BPindex++;
+                    } else if (goPvalueArray[i][1].equals("CC")) {
+                        cells[CCindex] = goPvalueArray[i];
+                        CCindex++;
+                    } else {
+                        cells[MFindex] = goPvalueArray[i];
+                        MFindex++;
+                    }
+                }
+
+
+                CyNetwork net = Cytoscape.getCurrentNetwork();
+                buildSubnetworkOverview(net, goPvalueArray, goNodeMap);
+                dialog = new SingleOutputDialog(Cytoscape.getDesktop(), false, cells, this.algType);
                 dialog.setLocationRelativeTo(Cytoscape.getDesktop());
                 dialog.setResizable(true);
             } else {
@@ -281,6 +378,137 @@ class NOASingleEnrichmentTask implements Task {
             e.printStackTrace();
         }
         success = true;
+    }
+    
+    public void findOverlap() {
+
+    }
+    public void buildSubnetworkOverview(CyNetwork net, Object[][] cells, HashMap<String, Set<String>> goNodeMap) {
+        CyNetwork overview_network = Cytoscape.createNetwork(new int[0], new int[0], "Overview", net);
+        CyNetworkView overview_view = Cytoscape.getNetworkView(overview_network.getIdentifier());
+        CyAttributes nAttributes = Cytoscape.getNodeAttributes();
+        CyAttributes eAttributes = Cytoscape.getEdgeAttributes();
+        int cutoff = 100;
+        
+        for(int i=0;i<cutoff;i++) {
+            CyNode cn1 = Cytoscape.getCyNode(cells[i][0].toString(), true);
+            List<String> cnList1 = new ArrayList<String>(goNodeMap.get(cells[i][0].toString()));
+            if(!overview_network.containsNode(cn1)){
+                overview_network.addNode(cn1);
+                nAttributes.setAttribute(cn1.getIdentifier(), "canonicalName", cells[i][5].toString());
+                nAttributes.setAttribute(cn1.getIdentifier(), "GO type", cells[i][1].toString());
+                nAttributes.setAttribute(cn1.getIdentifier(), "P-value", Double.parseDouble(cells[i][2].toString()));
+                nAttributes.setAttribute(cn1.getIdentifier(), "LogP", Math.log(Double.parseDouble(cells[i][2].toString())));
+                nAttributes.setListAttribute(cn1.getIdentifier(), "evidences", cnList1);
+                nAttributes.setAttribute(cn1.getIdentifier(), "subnetworkSize", cnList1.size());
+            }
+            for(int j=i+1;j<cutoff;j++) {
+                CyNode cn2 = Cytoscape.getCyNode(cells[j][0].toString(), true);
+                List<String> cnList2 = new ArrayList<String>(goNodeMap.get(cells[j][0].toString()));
+                if(!overview_network.containsNode(cn2)) {
+                    overview_network.addNode(cn2);
+                    nAttributes.setAttribute(cn2.getIdentifier(), "canonicalName", cells[j][5].toString());
+                    nAttributes.setAttribute(cn2.getIdentifier(), "GO type", cells[j][1].toString());
+                    nAttributes.setAttribute(cn2.getIdentifier(), "P-value", Double.parseDouble(cells[j][2].toString()));
+                    nAttributes.setAttribute(cn2.getIdentifier(), "LogP", Math.log(Double.parseDouble(cells[j][2].toString())));
+                    nAttributes.setListAttribute(cn2.getIdentifier(), "evidences", cnList2);
+                    nAttributes.setAttribute(cn2.getIdentifier(), "subnetworkSize", cnList2.size());
+                }
+                List<String> degreeOfEdge = EdgeAnnotationMethod.edgeIntersection(cnList1, cnList2);
+                if(degreeOfEdge.size()>10) {
+                    CyEdge ce = Cytoscape.getCyEdge(cn1, cn2, Semantics.INTERACTION, "subnetworkInteraction", true);
+                    if(!overview_network.containsEdge(ce)) {
+                        overview_network.addEdge(ce);
+                        eAttributes.setAttribute(ce.getIdentifier(), "overlapCount", degreeOfEdge.size());
+                        eAttributes.setListAttribute(ce.getIdentifier(), "commonEvidences", degreeOfEdge);
+                    }
+                }
+            }
+        }
+
+        VisualMappingManager vmm = Cytoscape.getVisualMappingManager();
+        CalculatorCatalog catalog = vmm.getCalculatorCatalog();
+        VisualStyle mfStyle;
+        try {
+            mfStyle = (VisualStyle) vmm.getVisualStyle().clone();
+        } catch (CloneNotSupportedException e) {
+            mfStyle = new VisualStyle("overview");
+        }
+        NodeAppearanceCalculator nac = new MFNodeAppearanceCalculator();
+        EdgeAppearanceCalculator eac = new MFEdgeAppearanceCalculator();
+        mfStyle.getDependency().set(VisualPropertyDependency.Definition.NODE_SIZE_LOCKED, false);
+        // NODE MAPPINGS
+        PassThroughMapping passMappingLabel = new PassThroughMapping("", "canonicalName");
+        Calculator labelCalculator = new BasicCalculator("subnetworkSize", passMappingLabel, VisualPropertyType.NODE_LABEL);
+        nac.setCalculator(labelCalculator);
+
+        ContinuousMapping contMappingNodeWidth = new ContinuousMapping(5, ObjectMapping.NODE_MAPPING);
+        contMappingNodeWidth.setControllingAttributeName("subnetworkSize", overview_view.getNetwork(), false);
+        contMappingNodeWidth.setInterpolator(new LinearNumberToNumberInterpolator());
+        contMappingNodeWidth.addPoint(5, new BoundaryRangeValues(10, 20, 20));
+        contMappingNodeWidth.addPoint(200, new BoundaryRangeValues(80, 80, 100));
+        Calculator nodeWidthCalculator = new BasicCalculator("subnetworkSize", contMappingNodeWidth, VisualPropertyType.NODE_WIDTH);
+        nac.setCalculator(nodeWidthCalculator);
+
+        ContinuousMapping contMappingNodeHeight = new ContinuousMapping(5, ObjectMapping.NODE_MAPPING);
+        contMappingNodeHeight.setControllingAttributeName("subnetworkSize", overview_view.getNetwork(), false);
+        contMappingNodeHeight.setInterpolator(new LinearNumberToNumberInterpolator());
+        contMappingNodeHeight.addPoint(5, new BoundaryRangeValues(10, 20, 20));
+        contMappingNodeHeight.addPoint(200, new BoundaryRangeValues(80, 80, 100));
+        Calculator nodeHeightCalculator = new BasicCalculator("subnetworkSize", contMappingNodeHeight, VisualPropertyType.NODE_HEIGHT);
+        nac.setCalculator(nodeHeightCalculator);
+
+        ContinuousMapping contMappingNodeColor = new ContinuousMapping(Color.WHITE, ObjectMapping.NODE_MAPPING);
+        contMappingNodeColor.setControllingAttributeName("LogP", overview_view.getNetwork(), false);
+        contMappingNodeColor.setInterpolator(new LinearNumberToColorInterpolator());
+        contMappingNodeColor.addPoint(-20.0, new BoundaryRangeValues(Color.YELLOW, Color.YELLOW, Color.YELLOW));
+        contMappingNodeColor.addPoint(-3.0, new BoundaryRangeValues(Color.BLUE, Color.BLUE, Color.BLACK));
+        Calculator colorCalculator = new BasicCalculator("LogP", contMappingNodeColor,VisualPropertyType.NODE_FILL_COLOR);
+        nac.setCalculator(colorCalculator);
+        mfStyle.setNodeAppearanceCalculator(nac);
+
+        // EDGE MAPPINGS
+        DiscreteMapping disMappingEdgeColor = new DiscreteMapping(
+                        LineStyle.SOLID, "_isEdgeToUnassigned",
+                        ObjectMapping.EDGE_MAPPING);
+        disMappingEdgeColor.putMapValue(Boolean.TRUE, LineStyle.LONG_DASH);
+        disMappingEdgeColor.putMapValue(Boolean.FALSE, LineStyle.SOLID);
+        Calculator edgeColorCalculator = new BasicCalculator(
+                        "overview", disMappingEdgeColor,
+                        VisualPropertyType.EDGE_LINE_STYLE);
+        eac.setCalculator(edgeColorCalculator);
+
+        DiscreteMapping disMappingEdgeLineStyle = new DiscreteMapping(
+                        Color.blue, "_isEdgeToUnassigned",
+                        ObjectMapping.EDGE_MAPPING);
+        disMappingEdgeLineStyle.putMapValue(Boolean.TRUE, Color.darkGray);
+        disMappingEdgeLineStyle.putMapValue(Boolean.FALSE, Color.blue);
+        Calculator edgeLineStyleCalculator = new BasicCalculator(
+                        "overview", disMappingEdgeLineStyle,
+                        VisualPropertyType.EDGE_COLOR);
+        eac.setCalculator(edgeLineStyleCalculator);
+
+        ContinuousMapping contMappingLineWidth = new ContinuousMapping(1, ObjectMapping.EDGE_MAPPING);
+        contMappingLineWidth.setControllingAttributeName("overlapCount", overview_view.getNetwork(), false);
+        contMappingLineWidth.setInterpolator(new LinearNumberToNumberInterpolator());
+        contMappingLineWidth.addPoint(10, new BoundaryRangeValues(0, 0, 1));
+        contMappingLineWidth.addPoint(200, new BoundaryRangeValues(40, 40, 60));
+        Calculator lineWidthCalculator = new BasicCalculator("overlapCount", contMappingLineWidth, VisualPropertyType.EDGE_LINE_WIDTH);
+        eac.setCalculator(lineWidthCalculator);
+
+        mfStyle.setEdgeAppearanceCalculator(eac);
+
+        // set edge opacity
+        VisualPropertyType type = VisualPropertyType.EDGE_OPACITY;
+        type.setDefault(mfStyle, new Integer(150));
+        // set node shape
+        type = VisualPropertyType.NODE_SHAPE;
+        type.setDefault(mfStyle, NodeShape.ELLIPSE);
+        vmm.setNetworkView(overview_view);
+        vmm.setVisualStyle(mfStyle);
+        Cytoscape.getVisualMappingManager().applyAppearances();
+        CyLayoutAlgorithm layout = CyLayouts.getLayout("force-directed");
+        layout.doLayout(overview_view);
     }
 
     public boolean success() {

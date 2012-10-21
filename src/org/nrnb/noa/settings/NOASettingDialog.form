@@ -631,7 +631,7 @@
                               <Component id="sAnnTypComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="sAnnIdeComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="15" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -902,7 +902,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="bAnnPanel" min="-2" pref="111" max="-2" attributes="2"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="bParPanel" min="-2" max="-2" attributes="2"/>
+                      <Component id="bParPanel" min="-2" pref="121" max="-2" attributes="2"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="bButtonPanel" min="-2" pref="41" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
@@ -1422,7 +1422,7 @@
                               <Component id="bAnnTypComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="bAnnIdeComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="15" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>

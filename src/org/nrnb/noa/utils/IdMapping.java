@@ -42,6 +42,25 @@ public class IdMapping {
     public IdMapping() {
     }
 
+    public static void removeAllSources(){
+        Map<String, Object> args = new HashMap<String, Object>();
+        Set<String> idTypes;
+        try {
+            CyCommandResult result = CyCommandManager.execute("idmapping", "list resources", args);
+            idTypes = (Set<String>) result.getResult();
+            System.out.println("Resources number: "+ idTypes.size());
+            for(String t : idTypes) {
+                System.out.println(t);
+                Map<String, Object> newargs = new HashMap<String, Object>();
+                newargs.put("connstring", t);
+                disConnectFileDB(newargs);
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     public static List<String> getSourceTypes() {
         String[] excludeTerms = new String[]{"DESCRIPTION", "TYPE", "CHROMOSOME", "OMIM", "IPI", "GENEWIKI", "SYNONYMS", "GENEONTOLOGY", "RFAM"};
         List excludeList = Arrays.asList(excludeTerms);
@@ -86,28 +105,6 @@ public class IdMapping {
         }
         return idTypes;
     }
-    
-//    public static boolean mapID(String derbyFilePath, String sourceIDName, String targetIDName) {
-//        System.out.println("Call idmapping success!");
-//        Map<String, Object> args = new HashMap<String, Object>();
-//        args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
-//        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-//        args.put("displayname", derbyFilePath);
-//        //CyDataset d
-//        connectFileDB(args);
-//        CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
-//        List<String> nodeIds = new ArrayList<String>();
-//        for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
-//            nodeIds.add(cn.getIdentifier());
-//        }
-////        mapAttribute(sourceIDName, targetIDName);
-//        mapGeneralAttribute(nodeIds, targetIDName);
-//        System.out.println("Successfully mapping ID");
-//        args = new HashMap<String, Object>();
-//        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-//        //disConnectFileDB(args);
-//        return true;
-//    }
 
     private void setGOAttribute(Map<String, Set<String>> idGOMap, String attributeName) {
         CyAttributes nodeAttrs = Cytoscape.getNodeAttributes();
@@ -242,18 +239,21 @@ public class IdMapping {
     }
 
     private Map<String, Set<String>> checkEmptyValue(Map<String, Set<String>> originalMap) {
-        Map<String, Set<String>> result = originalMap;
-        Object[] geneList = result.keySet().toArray();
+        Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+        Object[] geneList = originalMap.keySet().toArray();
         for(Object o:geneList) {
-            Set<String> GOList = result.get(o);
-            String temp = GOList.toString().trim();
-            if(temp.substring(1, temp.length()-1).trim().length()<1) {
-                Set<String> valueList = new HashSet<String>();
-                valueList.add("unassigned");
-                result.put(o.toString(), valueList);
-            } else {
-                result.put(o.toString(), GOList);
+            Set<String> sumValue = new HashSet();
+            Set<String> GOList = originalMap.get(o);
+            for(String value:GOList) {
+                if(value.trim().length()>0) {
+                    String[] multValues = value.split(",");
+                    for(String eachValue:multValues)
+                        sumValue.add(eachValue.trim());
+                }
             }
+            if(sumValue.size()<1)
+                sumValue.add("unassigned");
+            result.put(o.toString(), sumValue);
         }
         return result;
     }

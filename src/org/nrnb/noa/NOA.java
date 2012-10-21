@@ -101,6 +101,7 @@ public final class NOA extends CytoscapePlugin{
             }
         }
 
+        // Add plugin menu item
         JMenuItem item = new JMenuItem(pluginName);
         JMenu layoutMenu = Cytoscape.getDesktop().getCyMenus().getMenuBar()
                 .getMenu("Plugins");
@@ -113,20 +114,9 @@ public final class NOA extends CytoscapePlugin{
         GetHelpListener getHelpListener = new GetHelpListener();
         getHelp.addActionListener(getHelpListener);
         Cytoscape.getDesktop().getCyMenus().getHelpMenu().add(getHelp);
-
-//        // set properties
-//        // set view thresholds to handle "overview" xGMMLs
-//        CytoscapeInit.getProperties().setProperty("viewThreshold", "100000");
-//        CytoscapeInit.getProperties().setProperty("secondaryViewThreshold",
-//                        "120000");
-//        // set default node width/height lock to avoid dependency issues
-//        Cytoscape.getVisualMappingManager().getVisualStyle().getDependency()
-//                        .set(VisualPropertyDependency.Definition.NODE_SIZE_LOCKED,
-//                                        false);
-//        // cycommands
-//        //new WorkspacesCommandHandler();
     }
 }
+
 class NOAPluginActionListener implements ActionListener {
     NOA plugin = null;
 

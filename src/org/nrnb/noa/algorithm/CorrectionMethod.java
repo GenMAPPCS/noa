@@ -37,6 +37,19 @@ public class CorrectionMethod {
 		return reducedMap;
 	}
 
+    public static double[] calBonferCorrection(double[] pvalueArray, int total) {
+        double[] result = new double[pvalueArray.length];
+        for(int i=0;i<result.length;i++) {
+            if(pvalueArray[i]==0||pvalueArray[i]==-1000) {
+                result[i]=pvalueArray[i];
+            } else {
+                result[i] = Math.log(Math.exp(pvalueArray[i])*total>1?1:Math.exp(pvalueArray[i])*total);
+                result[i] = result[i]<-1000?-1000:result[i];
+            }
+        }
+		return result;
+	}
+
     public static HashMap<String, String> calBenjamCorrection(HashMap<String, String> resultMap, int total, double pvalueCutoff) {
         HashMap<String, String> reducedMap = new HashMap<String, String>();
         Object[][] goPvalueArray = new String[resultMap.size()][2];
@@ -58,5 +71,26 @@ public class CorrectionMethod {
                 reducedMap.put(goPvalueArray[i][0].toString(), pvalue+"\t"+temp[1]+"\t"+temp[2]);
         }
         return resultMap;
+	}
+
+    public static double[] calBenjamCorrection(double[] pvalueArray, int total) {
+        double[] result = new double[pvalueArray.length];
+        double[][] goPvalueArray = new double[pvalueArray.length][2];
+        for(int i=0;i<result.length;i++) {
+            goPvalueArray[i][0] = i;
+            goPvalueArray[i][1] = result[i];
+        }
+        goPvalueArray = NOAUtil.dataSort(goPvalueArray, 1);
+        for(int i=0;i<result.length;i++){
+            if(pvalueArray[i]==0||pvalueArray[i]==-1000) {
+                result[(int)goPvalueArray[i][0]] = pvalueArray[i];
+            } else {
+                double pvalue = Math.exp(goPvalueArray[i][1]);
+                pvalue = pvalue*total/(i+1);
+                pvalue = Math.log(pvalue>1?1:pvalue);
+                result[(int)goPvalueArray[i][0]] = pvalue<-1000?-1000:pvalue;
+            }
+        }
+		return result;
 	}
 }

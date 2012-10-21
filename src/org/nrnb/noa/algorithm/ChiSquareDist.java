@@ -16,20 +16,17 @@
 package org.nrnb.noa.algorithm;
 
 public class ChiSquareDist {
-    static private double
-        third = 1.0 / 3.0,
-        zero = 0.0,
-        one = 1.0,
-        two = 2.0,
-        oflo = 1.0e+37,
-        three = 3.0,
-        nine = 9.0,
-        xbig = 1.0e+8,
-        plimit = 1000.0e0,
-        elimit = -88.0e0;
-    static private double  SIXTEN = 1.6;
-        /* 30 Decimal-place constants computed with bc -l (scale=32; proper round) */
-
+    static private double third = 1.0 / 3.0;
+    static private double zero = 0.0;
+    static private double one = 1.0;
+    static private double two = 2.0;
+    static private double oflo = 1.0e+37;
+    static private double three = 3.0;
+    static private double nine = 9.0;
+    static private double xbig = 1.0e+8;
+    static private double plimit = 1000.0e0;
+    static private double elimit = -88.0e0;
+    static private double SIXTEN = 1.6;
     /* sqrt(32) */
     public static final double  M_SQRT_32 = 5.656854249492380195206754896838;
     /*1/sqrt(2pi)*/

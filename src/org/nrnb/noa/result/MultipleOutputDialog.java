@@ -19,21 +19,18 @@ import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
@@ -68,16 +65,15 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 
     /** Creates new form SingleOutputDialog */
     public MultipleOutputDialog(java.awt.Frame parent, boolean modal,
-            HashMap<String, ArrayList<String>> resultMap,
-            HashMap<String, String> topResultMap,
-            String algType, int inputFormat, int recordCount,
-            String tempHeatmapFileName) {
+            Object[][] cellsForResult, Object[][] cellsForTopResult,
+            Object[][] cellsForOverlap, String algType,
+            int inputFormat, String tempHeatmapFileName) {
         super(parent, modal);
-        this.resultMap = resultMap;
-        this.topResultMap = topResultMap;
+        this.cellsForResult = cellsForResult;
+        this.cellsForTopResult = cellsForTopResult;
+        this.cellsForOverlap = cellsForOverlap;
         this.algType = algType;
         this.formatSign = inputFormat;
-        this.recordCount = recordCount;
         this.heatmapFileName = tempHeatmapFileName;
         initComponents();
         initValues();
@@ -95,150 +91,6 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         } else {
             tableTitleForResult = new String [] {"Network ID", "GO ID", "Type", "P-value", "Test", "Reference", "Description", "Associated edges"};
             tableTitleForOverlap = new String [] {"GO ID", "Type", "Description", "Associated networks"};
-        }
-        Object[][] goPvalueArray = new String[recordCount][8];
-        cellsForTopResult = new Object[this.topResultMap.size()][8];
-        cellsForOverlap = new Object[resultMap.size()][4];
-        HashMap<String, String> GODescMap = new HashMap<String, String>();
-        int i = 0;
-        int j = 0;
-        int n = 0;
-        int BPcount = 0;
-        int CCcount = 0;
-        int MFcount = 0;
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass()
-                    .getResource(NOAStaticValues.GO_DescFile).openStream()));
-            String inputLine=in.readLine();
-            while ((inputLine = in.readLine()) != null) {
-                String[] retail = inputLine.split("\t");
-                if(retail.length>=3) {
-                    if(this.resultMap.containsKey(retail[0].trim())) {
-                        GODescMap.put(retail[0].trim(), inputLine);
-                        cellsForOverlap[j][0] = retail[0].trim();
-                        cellsForOverlap[j][3] = "";
-                        ArrayList<String> resultWithNetworkID = this.resultMap.get(retail[0].trim());
-                        for(String eachNet:resultWithNetworkID) {
-                            goPvalueArray[i][1] = retail[0];
-                            String[] temp = eachNet.trim().split("\t");
-                            goPvalueArray[i][0] = temp[3].trim();
-                            DecimalFormat df1 = new DecimalFormat("#.####");
-                            DecimalFormat df2 = new DecimalFormat("#.####E0");
-                            double pvalue = new Double(temp[0]).doubleValue();
-                            if(pvalue>0.0001)
-                                goPvalueArray[i][3] = df1.format(pvalue);
-                            else
-                                goPvalueArray[i][3] = df2.format(pvalue);
-                            goPvalueArray[i][4] = temp[1];
-                            goPvalueArray[i][5] = temp[2];
-                            goPvalueArray[i][6] = retail[1];
-                            cellsForOverlap[j][2] = retail[1];
-                            //String tempList = this.goNodeMap.get(retail[0]).toString();
-                            goPvalueArray[i][7] = temp[4].substring(1, temp[4].length()-1).trim();
-                            if(cellsForOverlap[j][3].equals("")){
-                                cellsForOverlap[j][3] = temp[3].trim();
-                            } else {
-                                cellsForOverlap[j][3] = cellsForOverlap[j][3]+"; "+temp[3].trim();
-                            }
-                            if(retail[2].equals("biological_process")) {
-                                goPvalueArray[i][2] = "BP";
-                                cellsForOverlap[j][1] = "BP";
-                                BPcount++;
-                            } else if (retail[2].equals("cellular_component")) {
-                                goPvalueArray[i][2] = "CC";
-                                cellsForOverlap[j][1] = "CC";
-                                CCcount++;
-                            } else {
-                                goPvalueArray[i][2] = "MF";
-                                cellsForOverlap[j][1] = "MF";
-                                MFcount++;
-                            }
-                            i++;
-                        }
-//                        if(cellsForOverlap[j][3].toString().substring(0,1).equals(";")){
-//                            cellsForOverlap[j][3] = cellsForOverlap[j][3].toString().substring(1, cellsForOverlap[j][3].toString().length()).trim();
-//                        }
-//                        if(cellsForOverlap[j][3].toString().substring(cellsForOverlap[j][3].toString().length()-1,cellsForOverlap[j][3].toString().length()).equals(";")){
-//                            cellsForOverlap[j][3] = cellsForOverlap[j][3].toString().substring(0, cellsForOverlap[j][3].toString().length()-1).trim();
-//                        }
-                        j++;
-                    }
-//                    if(this.topResultMap.containsKey(retail[0].trim())) {
-//                        String eachNet = this.topResultMap.get(retail[0].trim());
-//                        cellsForTopResult[n][1] = retail[0];
-//                        String[] temp = eachNet.trim().split("\t");
-//                        cellsForTopResult[n][0] = temp[3].trim();
-//                        DecimalFormat df1 = new DecimalFormat("#.####");
-//                        DecimalFormat df2 = new DecimalFormat("#.####E0");
-//                        double pvalue = new Double(temp[0]).doubleValue();
-//                        if(pvalue>0.0001)
-//                            cellsForTopResult[n][3] = df1.format(pvalue);
-//                        else
-//                            cellsForTopResult[n][3] = df2.format(pvalue);
-//                        cellsForTopResult[n][4] = temp[1];
-//                        cellsForTopResult[n][5] = temp[2];
-//                        cellsForTopResult[n][6] = retail[1];
-//
-//                        cellsForTopResult[n][7] = temp[4].substring(1, temp[4].length()-1).trim();
-//                        if(retail[2].equals("biological_process")) {
-//                            cellsForTopResult[n][2] = "BP";
-//                        } else if (retail[2].equals("cellular_component")) {
-//                            cellsForTopResult[n][2] = "CC";
-//                        } else {
-//                            cellsForTopResult[n][2] = "MF";
-//                        }
-//                        n++;
-//                    }
-                }
-            }
-            in.close();
-            Set<String> topResultKey = topResultMap.keySet();
-            for(String key:topResultKey){
-                cellsForTopResult[n][1] = key.substring(0, key.indexOf("\t"));
-                String[] retail = GODescMap.get(cellsForTopResult[n][1]).trim().split("\t");
-                String eachNet = this.topResultMap.get(key);                
-                String[] temp = eachNet.trim().split("\t");
-                cellsForTopResult[n][0] = temp[3].trim();
-                DecimalFormat df1 = new DecimalFormat("#.####");
-                DecimalFormat df2 = new DecimalFormat("#.####E0");
-                double pvalue = new Double(temp[0]).doubleValue();
-                if(pvalue>0.0001)
-                    cellsForTopResult[n][3] = df1.format(pvalue);
-                else
-                    cellsForTopResult[n][3] = df2.format(pvalue);
-                cellsForTopResult[n][4] = temp[1];
-                cellsForTopResult[n][5] = temp[2];
-                cellsForTopResult[n][6] = retail[1];
-
-                cellsForTopResult[n][7] = temp[4].substring(1, temp[4].length()-1).trim();
-                if(retail[2].equals("biological_process")) {
-                    cellsForTopResult[n][2] = "BP";
-                } else if (retail[2].equals("cellular_component")) {
-                    cellsForTopResult[n][2] = "CC";
-                } else {
-                    cellsForTopResult[n][2] = "MF";
-                }
-                n++;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        goPvalueArray = NOAUtil.dataSort(goPvalueArray, 3);
-        cellsForResult = new Object[recordCount][8];
-        int BPindex = 0;
-        int CCindex = BPcount;
-        int MFindex = BPcount+CCcount;
-        for(i=0;i<goPvalueArray.length;i++){
-            if(goPvalueArray[i][2].equals("BP")) {
-                cellsForResult[BPindex] = goPvalueArray[i];
-                BPindex++;
-            } else if (goPvalueArray[i][2].equals("CC")) {
-                cellsForResult[CCindex] = goPvalueArray[i];
-                CCindex++;
-            } else {
-                cellsForResult[MFindex] = goPvalueArray[i];
-                MFindex++;
-            }
         }
         outputModelForResult = new OutputTableModel(cellsForResult, tableTitleForResult);
         resultTable.setModel(outputModelForResult);
@@ -263,7 +115,7 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         overlapTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         overlapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         overlapTable.addMouseListener(this);
-        //overlapTable.setAutoCreateRowSorter(true);
+        setColumnWidths(overlapTable);
 
         resultTabbedPane.addChangeListener(this);
         heatmapButton.setVisible(false);
@@ -519,7 +371,8 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             String resultFilePath = fc.getSelectedFile().getPath() + "_result.csv";
             String overlapFilePath = fc.getSelectedFile().getPath() + "_overlap.csv";
-            String heatmapFilePath = fc.getSelectedFile().getPath() + "_heatmap.png";
+            String heatmapFilePath = fc.getSelectedFile().getPath() + "_heatmap";
+            String allResultsFilePath = fc.getSelectedFile().getPath() + "_all.csv";
             try {
                 int rowNumber = outputModelForResult.getRowCount();
                 List<String> output = new ArrayList<String>();
@@ -539,7 +392,19 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
                     output.add(tempLine);
                 }
                 NOAUtil.writeFile(output, overlapFilePath);
-                NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName, heatmapFilePath);
+                if(new File(NOA.NOATempDir+this.heatmapFileName+"_MF.png").exists()){
+                    NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+"_MF.png", heatmapFilePath+"_MF.png");
+                    NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+"_MF.csv", heatmapFilePath+"_MF.csv");
+                }
+                if(new File(NOA.NOATempDir+this.heatmapFileName+"_CC.png").exists()){
+                    NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+"_CC.png", heatmapFilePath+"_CC.png");
+                    NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+"_CC.csv", heatmapFilePath+"_CC.csv");
+                }
+                if(new File(NOA.NOATempDir+this.heatmapFileName+"_BP.png").exists()){
+                    NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+"_BP.png", heatmapFilePath+"_BP.png");
+                    NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+"_BP.csv", heatmapFilePath+"_BP.csv");
+                }
+                NOAUtil.copyfile(NOA.NOATempDir+this.heatmapFileName+".csv", allResultsFilePath);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -548,52 +413,73 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 
     private void heatmapButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_heatmapButtonActionPerformed
         // TODO add your handling code here:
-        if(new File(NOA.NOATempDir+heatmapFileName).exists()){
-//            ImageIcon imh = new ImageIcon(NOA.NOATempDir+heatmapFileName);
-//            int widSize = imh.getIconWidth();
-//            int heiSize = imh.getIconHeight();
-//            int realWide = 0;
-//            int realHei = 0;
-//            if(heiSize>widSize){
-//                double portion = (double)heiSize/600.0;
-//                realHei = 600;
-//                realWide = (int)((double)widSize/portion);
-//            } else {
-//                double portion = (double)widSize/800.0;
-//                realHei = (int)((double)heiSize/portion);
-//                realWide = 800;
-//            }
-//            Image img = imh.getImage();
-//            Image resizedImage =img.getScaledInstance(realWide, realHei, Image.SCALE_DEFAULT);
-//            JLabel pnlBackground = new JLabel(new ImageIcon(resizedImage));
-//            pnlBackground.setBounds(0, 0, realWide, realHei);
-//            JDialog dialog = new JDialog(this, "Pvalue heatmap between first 200 networks/sets and 200 GO IDs");
-//            dialog.setContentPane(pnlBackground);
-//            dialog.setSize(realWide, realHei);
-//            dialog.setVisible(true);
-
-            ImageIcon imh = new ImageIcon(NOA.NOATempDir+heatmapFileName);
-            int widSize = imh.getIconWidth();
-            int heiSize = imh.getIconHeight();
+        if(new File(NOA.NOATempDir+this.heatmapFileName+"_BP.png").exists()||
+                new File(NOA.NOATempDir+this.heatmapFileName+"_CC.png").exists()||
+                new File(NOA.NOATempDir+this.heatmapFileName+"_MF.png").exists()){
             int realWide = 0;
-            int realHei = 0;
-            if(heiSize>widSize){
-                double portion = (double)heiSize/600.0;
-                realHei = 600;
-                realWide = (int)((double)widSize/portion);
-            } else {
-                double portion = (double)widSize/800.0;
-                realHei = (int)((double)heiSize/portion);
-                realWide = 800;
+            int realHei = 0;            
+            
+            JDialog dialog = new JDialog(this, "Pvalue heatmap between networks/sets and GO IDs");
+            JTabbedPane heatmapTabbedPane = new JTabbedPane();
+            if(new File(NOA.NOATempDir+this.heatmapFileName+"_MF.png").exists()){
+                ImageIcon imh = new ImageIcon(NOA.NOATempDir+this.heatmapFileName+"_MF.png");
+                int widSize = imh.getIconWidth();
+                int heiSize = imh.getIconHeight();
+                if(heiSize>widSize){
+                    double portion = (double)heiSize/600.0;
+                    realHei = 600;
+                    realWide = (int)((double)widSize/portion);
+                } else {
+                    double portion = (double)widSize/800.0;
+                    realHei = (int)((double)heiSize/portion);
+                    realWide = 800;
+                }
+                JLabel imageLabel = new JLabel(imh);
+                JScrollPane pnlBackground = new JScrollPane(imageLabel);
+                heatmapTabbedPane.add(pnlBackground, 0);
+                heatmapTabbedPane.setTitleAt(0, "Molecular Function");
+            }
+            if(new File(NOA.NOATempDir+this.heatmapFileName+"_CC.png").exists()){
+                ImageIcon imh = new ImageIcon(NOA.NOATempDir+this.heatmapFileName+"_CC.png");
+                int widSize = imh.getIconWidth();
+                int heiSize = imh.getIconHeight();
+                if(heiSize>widSize){
+                    double portion = (double)heiSize/600.0;
+                    realHei = 600;
+                    realWide = (int)((double)widSize/portion);
+                } else {
+                    double portion = (double)widSize/800.0;
+                    realHei = (int)((double)heiSize/portion);
+                    realWide = 800;
+                }
+                JLabel imageLabel = new JLabel(imh);
+                JScrollPane pnlBackground = new JScrollPane(imageLabel);
+                heatmapTabbedPane.add(pnlBackground, 0);
+                heatmapTabbedPane.setTitleAt(0, "Cellular Component");
+            }
+            if(new File(NOA.NOATempDir+this.heatmapFileName+"_BP.png").exists()){
+                ImageIcon imh = new ImageIcon(NOA.NOATempDir+this.heatmapFileName+"_BP.png");
+                int widSize = imh.getIconWidth();
+                int heiSize = imh.getIconHeight();
+                if(heiSize>widSize){
+                    double portion = (double)heiSize/600.0;
+                    realHei = 600;
+                    realWide = (int)((double)widSize/portion);
+                } else {
+                    double portion = (double)widSize/800.0;
+                    realHei = (int)((double)heiSize/portion);
+                    realWide = 800;
+                }
+                JLabel imageLabel = new JLabel(imh);
+                JScrollPane pnlBackground = new JScrollPane(imageLabel);                
+                heatmapTabbedPane.add(pnlBackground, 0);
+                heatmapTabbedPane.setTitleAt(0, "Biological Process");
             }
             if(realHei<200)
                 realHei = 200;
             if(realWide<200)
                 realWide = 200;
-            JLabel imageLabel = new JLabel(imh);
-            JScrollPane pnlBackground = new JScrollPane(imageLabel);
-            JDialog dialog = new JDialog(this, "Pvalue heatmap between first 200 networks/sets and 200 GO IDs");
-            dialog.setContentPane(pnlBackground);
+            dialog.setContentPane(heatmapTabbedPane);
             dialog.setLocationRelativeTo(this);
             dialog.setSize(realWide, realHei);
             dialog.setVisible(true);
@@ -603,8 +489,22 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        if(new File(NOA.NOATempDir+this.heatmapFileName).exists())
-            new File(NOA.NOATempDir+this.heatmapFileName).delete();
+        if(new File(NOA.NOATempDir+this.heatmapFileName+".png").exists())
+            new File(NOA.NOATempDir+this.heatmapFileName+".png").delete();
+        if(new File(NOA.NOATempDir+this.heatmapFileName+".csv").exists())
+            new File(NOA.NOATempDir+this.heatmapFileName+".csv").delete();
+        if(new File(NOA.NOATempDir+this.heatmapFileName+"_BP.png").exists()){
+            new File(NOA.NOATempDir+this.heatmapFileName+"_BP.png").delete();
+            new File(NOA.NOATempDir+this.heatmapFileName+"_BP.csv").delete();
+        }
+        if(new File(NOA.NOATempDir+this.heatmapFileName+"_CC.png").exists()){
+            new File(NOA.NOATempDir+this.heatmapFileName+"_CC.png").delete();
+            new File(NOA.NOATempDir+this.heatmapFileName+"_CC.csv").delete();
+        }
+        if(new File(NOA.NOATempDir+this.heatmapFileName+"_MF.png").exists()){
+            new File(NOA.NOATempDir+this.heatmapFileName+"_MF.png").delete();
+            new File(NOA.NOATempDir+this.heatmapFileName+"_MF.csv").delete();
+        }
         this.dispose();
     }//GEN-LAST:event_formWindowClosed
 
@@ -697,7 +597,9 @@ public class MultipleOutputDialog extends javax.swing.JDialog implements MouseLi
             resultSwitchComboBox.setEnabled(true);
             resultSwitchComboBox.setVisible(true);
         } else {
-            if(new File(NOA.NOATempDir+heatmapFileName).exists()) {
+            if(new File(NOA.NOATempDir+this.heatmapFileName+"_BP.png").exists()||
+                new File(NOA.NOATempDir+this.heatmapFileName+"_CC.png").exists()||
+                new File(NOA.NOATempDir+this.heatmapFileName+"_MF.png").exists()){
                 heatmapButton.setEnabled(true);
                 heatmapButton.setVisible(true);
             }

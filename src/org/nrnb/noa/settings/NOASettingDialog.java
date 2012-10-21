@@ -18,16 +18,9 @@ package org.nrnb.noa.settings;
 import cytoscape.Cytoscape;
 import cytoscape.CytoscapeInit;
 import cytoscape.data.CyAttributes;
-import cytoscape.task.Task;
-import cytoscape.task.TaskMonitor;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -39,13 +32,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -76,7 +67,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     public NOASettingDialog(java.awt.Frame parent, boolean model) {
         super(parent, model);
         String networkTitle = Cytoscape.getCurrentNetwork().getTitle();
-        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 06/11/2012";
+        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 09/17/2012";
         if(!networkTitle.trim().equals("0"))
             dialogTitle += " - "+networkTitle;
         this.setTitle(dialogTitle);
@@ -93,6 +84,8 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     }
 
     private void initValues() {
+        IdMapping.removeAllSources();
+        
         speciesValues = Arrays.asList(NOAStaticValues.speciesList);
         if(currentNetworksize>0) {
             NOAMainTabbedPane.setSelectedIndex(0);
@@ -1414,23 +1407,11 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
 
     private void bAnnSpeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAnnSpeComboBoxActionPerformed
         // TODO add your handling code here:
-        //System.out.println(bAnnSpeComboBox.getSelectedItem().toString());
-//        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
-//        final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
-//        warningDialog.addPropertyChangeListener(
-//            new PropertyChangeListener() {
-//                public void propertyChange(PropertyChangeEvent e) {
-//                    String prop = e.getPropertyName();
-//                    if (dialog.isVisible())
-//                        dialog.setVisible(false);
-//                }
-//            });
         final JDialog dialog = new WaitDialog(this, "Retrieving data for selected species...");
-
         if(initialTag == -1) {
             //dialog.setContentPane(warningDialog);
             dialog.setLocation(this.getLocation().x+200, this.getLocation().y+150);
-            dialog.pack();
+            //dialog.pack();
             dialog.setVisible(true);
         }
 
@@ -1503,19 +1484,11 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         // Execute Task in New Thread; pop open JTask Dialog Box.
         TaskManager.executeTask(task, jTaskConfig);
         boolean succ = task.success();
-//        if (succ) {
-//            this.setVisible(false);
-//            this.dispose();
-//        } else {
-//            //Delete the new attributes
-////            CyAttributes nodeAttributes = Cytoscape.getNodeAttributes();
-////            for (String attrName : mapTgtAttrNameAttrType.keySet()) {
-////                nodeAttributes.deleteAttribute(attrName);
-////            }
-//        }
         final JDialog dialog = task.dialog();
         if(dialog!=null)
             dialog.setVisible(true);
+        Cytoscape.getDesktop().getCytoPanel(SwingConstants.WEST).setSelectedIndex(0);
+        this.dispose();
     }//GEN-LAST:event_bSubmitButtonActionPerformed
 
     private void bCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bCancelButtonActionPerformed
@@ -1532,23 +1505,10 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         // TODO add your handling code here:
         //Regenerate list of ID types when user select another species.
         NOA.logger.debug("change species");        
-//        final JOptionPane warningDialog = new JOptionPane("Please wait few seconds...",JOptionPane.WARNING_MESSAGE);
-//        final JDialog dialog = new JDialog(this, "Retrieving data for selected species...");
         final JDialog dialog = new WaitDialog(this, "Retrieving data for selected species...");
-
-//        warningDialog.addPropertyChangeListener(
-//            new PropertyChangeListener() {
-//                public void propertyChange(PropertyChangeEvent e) {
-//                    String prop = e.getPropertyName();
-//                    if (dialog.isVisible())
-//                        dialog.setVisible(false);
-//                }
-//            });
-
         if(initialTag == -1) {
-            //dialog.setContentPane(warningDialog);
             dialog.setLocation(this.getLocation().x+200, this.getLocation().y+150);
-            dialog.pack();
+            //dialog.pack();
             dialog.setVisible(true);
         }
 
@@ -1568,7 +1528,6 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                             NOA.NOADatabaseDir), annotationSpeciesCode+
                             "_Derby", ".bridge")+".bridge");
                     idMappingTypeValues = IdMapping.getSourceTypes();
-                    //System.out.println("No. of types "+ idMappingTypeValues.size());
                     sAnnTypComboBox.removeAllItems();
                     sAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
                 }
@@ -1609,7 +1568,6 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
                         NOA.NOADatabaseDir), annotationSpeciesCode+
                         "_Derby", ".bridge")+".bridge");
                 idMappingTypeValues = IdMapping.getSourceTypes();
-                //System.out.println(idMappingTypeValues.toString());
                 sAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
             }
             sAnnIdeComboBox.setSelectedItem("ID");
@@ -1692,21 +1650,13 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
         // Execute Task in New Thread; pop open JTask Dialog Box.
         TaskManager.executeTask(task, jTaskConfig);
         boolean succ = task.success();
-//        if (succ) {
-//            this.setVisible(false);
-//            this.dispose();
-//        } else {
-//            //Delete the new attributes
-////            CyAttributes nodeAttributes = Cytoscape.getNodeAttributes();
-////            for (String attrName : mapTgtAttrNameAttrType.keySet()) {
-////                nodeAttributes.deleteAttribute(attrName);
-////            }
-//        }
         final JDialog dialog = task.dialog();
         if(dialog!=null) {
             dialog.setVisible(true);
             dialog.isFocused();
         }
+        Cytoscape.getDesktop().getCytoPanel(SwingConstants.WEST).setSelectedIndex(0);
+        this.dispose();
     }//GEN-LAST:event_sSubmitButtonActionPerformed
 
     private void sCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sCancelButtonActionPerformed
