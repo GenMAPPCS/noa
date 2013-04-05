@@ -67,7 +67,7 @@ public class NOASettingDialog extends javax.swing.JDialog implements ChangeListe
     public NOASettingDialog(java.awt.Frame parent, boolean model) {
         super(parent, model);
         String networkTitle = Cytoscape.getCurrentNetwork().getTitle();
-        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION + " 09/17/2012";
+        String dialogTitle = NOA.pluginName+" Settings"+ " "+NOA.VERSION;
         if(!networkTitle.trim().equals("0"))
             dialogTitle += " - "+networkTitle;
         this.setTitle(dialogTitle);
