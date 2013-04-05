@@ -225,7 +225,7 @@ class NewDialogTask implements Task {
  * This class direct a browser to the help manual web page.
  */
 class GetHelpListener implements ActionListener {
-    private String helpURL = "http://genmapp.org/beta/mosaic/index.html";
+    private String helpURL = "http://genmapp.org/beta/noa/index.html";
 
 	public void actionPerformed(ActionEvent ae) {
 		cytoscape.util.OpenBrowser.openURL(helpURL);
