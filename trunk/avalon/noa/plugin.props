@@ -10,7 +10,7 @@ pluginName=NOA
 
 # Description used to give users information about the plugin such as what it does.
 # Html tags are encouraged for formatting purposes.
-pluginDescription=Network partition, layout and color based on Gene Ontology or other annotations
+pluginDescription=Network Ontology Analysis, Enrichment Analysis, Multiple Networks Function Analysis
 
 # Plugin version number, this must be two numbers separated by a decimlal.  Ex. 0.2, 14.03
 pluginVersion=1.0
@@ -19,16 +19,16 @@ pluginVersion=1.0
 cytoscapeVersion=2.8
 
 # Category, use one of the categories listed on the http://cytoscape.org/plugins2.php site or create your own
-pluginCategory=Functional Enrichment
+pluginCategory=ontology analysis
 
 # -- The following properties are OPTIONAL -- #
 
 # URL to a website that gives more information about your plugin, Ex. http://my-lab-site.org
-projectURL=http://pinscher.ucsf.edu/meta/trunk/noa/
+projectURL=http://genmapp.org/beta/noa/
 
 # List of authors.  Note each author and institution pair are separated by a : (colon)
 # each additional author institution pair must be separated from other pairs bye a ; (semicolon)
-pluginAuthorsInstitutions=Chao Zhang:University of Missouri & GSoC;Jiguang Wang:Columbia University;Alexander Pico:Gladstone Institutes, UCSF;
+pluginAuthorsInstitutions=Chao Zhang:Weill Medical College, Cornell University;Jiguang Wang:Columbia University;Alexander Pico:Gladstone Institutes, UCSF;
 
 # Date this plugin/plugin version was released
-releaseDate=Nov 8, 2011
+releaseDate=April 1, 2013
